@@ -1,0 +1,1690 @@
+<title>Byte to Answer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#EEF0F3;
+    --bg-panel:#FFFFFF;
+    --bg-sunken:#E2E6EA;
+    --ink:#20242B;
+    --ink-soft:#5A616B;
+    --line:#D2D7DC;
+    --amber:#B15A15;
+    --amber-bg:#F3E1CE;
+    --teal:#186F67;
+    --teal-bg:#D6EAE7;
+    --accent:var(--amber);
+    --accent-bg:var(--amber-bg);
+    --focus:#2A6FD6;
+    --font-display:'Big Shoulders Display', system-ui, sans-serif;
+    --font-body:'Source Sans 3', system-ui, -apple-system, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171C;
+      --bg-panel:#1C2027;
+      --bg-sunken:#11141A;
+      --ink:#E7E9ED;
+      --ink-soft:#9AA1AC;
+      --line:#2E343D;
+      --amber:#E2924D;
+      --amber-bg:#3B2A18;
+      --teal:#57BCB2;
+      --teal-bg:#173330;
+      --focus:#6FA3F2;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14171C;
+    --bg-panel:#1C2027;
+    --bg-sunken:#11141A;
+    --ink:#E7E9ED;
+    --ink-soft:#9AA1AC;
+    --line:#2E343D;
+    --amber:#E2924D;
+    --amber-bg:#3B2A18;
+    --teal:#57BCB2;
+    --teal-bg:#173330;
+    --focus:#6FA3F2;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:var(--font-display); font-weight:800; text-wrap:balance; margin:0; color:var(--ink); }
+  p{ margin:0 0 0.9em; max-width:62ch; color:var(--ink); }
+  a{ color:var(--accent); }
+  ::selection{ background:var(--accent-bg); }
+  :focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:4px; }
+
+  .mono{ font-family:var(--font-mono); }
+  .soft{ color:var(--ink-soft); }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+
+  .term{
+    position:relative;
+    border-bottom:1.5px dotted currentColor;
+    cursor:help;
+    font-weight:600;
+  }
+  .term:hover::after, .term:focus-visible::after{
+    content:attr(data-tip);
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 8px);
+    transform:translateX(-50%);
+    width:min(280px, 60vw);
+    background:var(--ink);
+    color:var(--bg);
+    font-family:var(--font-body);
+    font-weight:400;
+    font-size:0.82rem;
+    line-height:1.4;
+    padding:0.6em 0.75em;
+    border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    z-index:40;
+    text-transform:none;
+    letter-spacing:normal;
+  }
+  :root[data-theme="dark"] .term:hover::after, :root[data-theme="dark"] .term:focus-visible::after{ background:var(--ink); color:var(--bg); }
+
+  /* ---- layout shell ---- */
+  .shell{ max-width:1180px; margin:0 auto; padding:0 clamp(1.1rem, 3vw, 2.5rem); }
+  .grid-main{ display:grid; grid-template-columns:220px minmax(0,1fr); gap:clamp(1.5rem,4vw,3rem); align-items:start; }
+  @media (max-width:880px){ .grid-main{ grid-template-columns:1fr; } }
+
+  /* ---- hero ---- */
+  header.hero{ padding:clamp(2.5rem,7vw,4.5rem) 0 clamp(2rem,5vw,3rem); border-bottom:1px solid var(--line); }
+  header.hero .kicker{ display:flex; gap:0.6rem; align-items:center; margin-bottom:1rem; }
+  header.hero h1{ font-size:clamp(2.6rem,6.4vw,4.6rem); line-height:0.98; letter-spacing:0.005em; }
+  header.hero h1 em{ font-style:normal; color:var(--amber); }
+  header.hero .lede{ font-size:1.15rem; max-width:56ch; color:var(--ink-soft); margin-top:1.1rem; }
+  .legend{ display:flex; flex-wrap:wrap; gap:1.4rem; margin-top:1.6rem; font-family:var(--font-mono); font-size:0.82rem; }
+  .legend-item{ display:flex; align-items:center; gap:0.5rem; color:var(--ink-soft); }
+  .swatch{ width:12px; height:12px; border-radius:3px; flex:none; }
+
+  /* ---- nav rail ---- */
+  nav.rail{ position:sticky; top:1.25rem; align-self:start; }
+  nav.rail ol{ list-style:none; margin:0; padding:0; border-left:2px solid var(--line); }
+  nav.rail li{ position:relative; }
+  nav.rail a{
+    display:block;
+    padding:0.5rem 0 0.5rem 1rem;
+    margin-left:-2px;
+    border-left:2px solid transparent;
+    text-decoration:none;
+    color:var(--ink-soft);
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    line-height:1.3;
+  }
+  nav.rail a .num{ display:inline-block; width:1.6em; color:var(--ink-soft); }
+  nav.rail a.active{ color:var(--ink); border-left-color:var(--accent); font-weight:600; }
+  nav.rail a.active .num{ color:var(--accent); }
+  nav.rail a.seen .dot{ background:var(--accent); }
+  nav.rail .dot{ display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--line); margin-left:0.4em; vertical-align:middle; }
+  nav.rail .divider{ height:1px; background:var(--line); margin:0.85rem 0 0.85rem 1rem; }
+  @media (max-width:880px){
+    nav.rail{ position:static; margin-bottom:1rem; }
+    nav.rail ol{ display:flex; flex-wrap:wrap; gap:0 0.5rem; border-left:none; border-top:1px solid var(--line); padding-top:0.75rem; }
+    nav.rail .divider{ display:none; }
+    nav.rail a{ padding:0.35rem 0.5rem; border-left:none; border-bottom:2px solid transparent; }
+    nav.rail a.active{ border-left:none; border-bottom-color:var(--accent); }
+  }
+
+  /* ---- part sections ---- */
+  .part{ padding:clamp(2.5rem,5vw,3.5rem) 0; }
+  .part-a{ --accent:var(--amber); --accent-bg:var(--amber-bg); }
+  .part-b{ --accent:var(--teal); --accent-bg:var(--teal-bg); }
+  .part-head{ margin-bottom:2.2rem; max-width:64ch; }
+  .part-head h2{ font-size:clamp(1.8rem,3.6vw,2.6rem); margin-top:0.35rem; }
+  .transition-note{
+    margin:clamp(2rem,5vw,3rem) 0;
+    padding:1.4rem 1.6rem;
+    background:var(--bg-sunken);
+    border-radius:10px;
+    border-left:3px solid var(--accent);
+    max-width:70ch;
+  }
+  .transition-note p:last-child{ margin-bottom:0; }
+
+  /* ---- path / modules ---- */
+  .path{ list-style:none; margin:0; padding:0; position:relative; }
+  .path::before{
+    content:'';
+    position:absolute;
+    left:1.05rem;
+    top:0.4rem;
+    bottom:0.4rem;
+    width:2px;
+    background:linear-gradient(to bottom, var(--accent), color-mix(in srgb, var(--accent) 25%, transparent));
+    opacity:0.55;
+  }
+  .path > li{ position:relative; padding-left:3rem; margin-bottom:clamp(1.5rem,3vw,2.25rem); }
+  .path > li:last-child{ margin-bottom:0; }
+  .marker{
+    position:absolute; left:0; top:0.4rem;
+    width:2.1rem; height:2.1rem;
+    border-radius:50%;
+    background:var(--bg-panel);
+    border:2px solid var(--accent);
+    color:var(--accent);
+    font-family:var(--font-mono); font-weight:600; font-size:0.85rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .module{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:clamp(1.25rem,3vw,1.85rem);
+  }
+  .module-head{ margin-bottom:1rem; }
+  .module-head h3{ font-size:1.4rem; margin-top:0.15rem; }
+  .module-head .eyebrow{ display:block; margin-bottom:0.2rem; }
+  .module p.desc{ color:var(--ink-soft); font-size:0.97rem; }
+
+  /* ---- controls ---- */
+  label.field{ display:block; margin:0.9rem 0 0.4rem; font-family:var(--font-mono); font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink-soft); }
+  textarea, input[type="text"]{
+    width:100%;
+    background:var(--bg-sunken);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:0.92rem;
+    padding:0.7rem 0.85rem;
+    resize:vertical;
+  }
+  textarea:focus, input[type="text"]:focus{ outline:2px solid var(--focus); outline-offset:1px; }
+
+  .row{ display:flex; flex-wrap:wrap; gap:1.25rem 2rem; align-items:flex-end; margin-top:0.6rem; }
+  .slider-field{ min-width:180px; flex:1; }
+  .slider-field .val{ font-family:var(--font-mono); color:var(--accent); font-weight:600; }
+  input[type="range"]{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:4px; border-radius:2px;
+    background:var(--line); outline:none; margin-top:0.5rem;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--accent); border:2px solid var(--bg-panel); box-shadow:0 0 0 1px var(--accent); cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; border:2px solid var(--bg-panel);
+    background:var(--accent); box-shadow:0 0 0 1px var(--accent); cursor:pointer;
+  }
+
+  button{
+    font-family:var(--font-mono);
+    font-size:0.82rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    font-weight:600;
+    padding:0.6rem 1.05rem;
+    border-radius:7px;
+    border:1px solid var(--accent);
+    background:transparent;
+    color:var(--accent);
+    cursor:pointer;
+  }
+  button.solid{ background:var(--accent); color:var(--bg-panel); }
+  button:hover{ filter:brightness(1.08); }
+  button:disabled{ opacity:0.45; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem; }
+
+  /* ---- bytes ---- */
+  .byte-grid{ display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.9rem; }
+  .byte-cell{
+    font-family:var(--font-mono); font-size:0.78rem;
+    background:var(--bg-sunken); border:1px solid var(--line); border-radius:6px;
+    padding:0.3rem 0.45rem; text-align:center; min-width:2.6rem;
+  }
+  .byte-cell .hex{ display:block; color:var(--accent); font-weight:600; }
+  .byte-cell .dec{ display:block; color:var(--ink-soft); font-size:0.68rem; }
+
+  /* ---- tokens ---- */
+  .token-chips{ display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.9rem; }
+  .chip{
+    font-family:var(--font-mono); font-size:0.85rem;
+    background:var(--accent-bg); border:1px solid var(--accent); color:var(--ink);
+    border-radius:6px; padding:0.32rem 0.55rem; cursor:pointer;
+  }
+  .chip .space-dot{ color:var(--accent); }
+  .chip.selected{ background:var(--accent); color:var(--bg-panel); }
+  .chip small{ display:block; font-size:0.62rem; opacity:0.75; margin-top:0.1rem; }
+
+  /* ---- embedding strip ---- */
+  .embed-strip{ display:flex; gap:3px; margin-top:0.9rem; height:52px; }
+  .embed-cell{ flex:1; border-radius:4px; position:relative; }
+  .embed-cell span{
+    position:absolute; bottom:-1.3rem; left:50%; transform:translateX(-50%);
+    font-family:var(--font-mono); font-size:0.62rem; color:var(--ink-soft);
+  }
+
+  /* ---- attention grid ---- */
+  .attn-wrap{ overflow-x:auto; margin-top:1rem; }
+  table.attn{ border-collapse:collapse; font-family:var(--font-mono); font-size:0.72rem; }
+  table.attn th, table.attn td{ padding:0; text-align:center; }
+  table.attn th{ color:var(--ink-soft); font-weight:500; padding:0.2rem 0.35rem; max-width:60px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.attn td{ width:34px; height:34px; border:1px solid var(--bg); cursor:pointer; }
+  table.attn tr th:first-child, table.attn td.rowlabel{ text-align:right; padding-right:0.5rem; color:var(--ink-soft); }
+  .attn-note{ margin-top:0.75rem; font-size:0.88rem; color:var(--ink-soft); }
+
+  /* ---- head tabs ---- */
+  #aHeadTabs{ margin-top:0.9rem; }
+  #aHeadTabs button.active{ background:var(--accent); color:var(--bg-panel); }
+
+  /* ---- positional encoding grid ---- */
+  .pos-grid{ display:flex; flex-direction:column; gap:0.35rem; margin-top:1rem; }
+  .pos-row{ display:grid; grid-template-columns:6.5rem 1fr; align-items:center; gap:0.7rem; }
+  .pos-row.is-selected{ outline:1.5px dashed var(--accent); outline-offset:4px; border-radius:6px; }
+  .pos-row .pos-label{ font-family:var(--font-mono); font-size:0.76rem; color:var(--ink-soft); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pos-row .embed-strip{ margin-top:0; height:22px; }
+
+  /* ---- stacked vector strips (positional / feed-forward chains) ---- */
+  .stack-strip{ display:flex; flex-direction:column; gap:0.5rem; margin-top:0.9rem; }
+  .strip-row{ display:flex; flex-direction:column; gap:0.3rem; }
+  .strip-row .strip-label{ font-family:var(--font-mono); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); }
+  .strip-row .embed-strip{ margin-top:0; height:34px; }
+  .strip-row .embed-strip.wide .embed-cell{ min-width:0; }
+  .strip-op{ font-family:var(--font-mono); font-weight:700; color:var(--accent); font-size:1rem; margin-left:0.2rem; }
+
+  /* ---- diagrams ---- */
+  .diagram-figure{ margin:1.1rem 0 0; padding:1.1rem; background:var(--bg-sunken); border-radius:10px; border:1px solid var(--line); }
+  .diagram-figure svg{ display:block; max-width:100%; height:auto; margin:0 auto; color:var(--ink); }
+  .diagram-figure svg#stackSvg{ max-width:520px; }
+  .diagram-figure figcaption{ margin-top:0.8rem; font-size:0.82rem; color:var(--ink-soft); max-width:56ch; }
+
+  /* ---- sampling bars ---- */
+  .bars{ margin-top:1rem; display:flex; flex-direction:column; gap:0.4rem; }
+  .bar-row{ display:grid; grid-template-columns:6.5rem 1fr 3.4rem; align-items:center; gap:0.6rem; font-family:var(--font-mono); font-size:0.8rem; }
+  .bar-row .track{ background:var(--bg-sunken); border-radius:5px; height:14px; overflow:hidden; }
+  .bar-row .fill{ height:100%; background:var(--accent); border-radius:5px; }
+  .gen-output{
+    margin-top:1rem; min-height:2.6rem; padding:0.85rem 1rem;
+    background:var(--bg-sunken); border-radius:8px; font-family:var(--font-mono); font-size:0.95rem;
+    border-left:3px solid var(--accent);
+  }
+  .gen-output .cursor{ display:inline-block; width:0.55em; background:var(--accent); animation:blink 1s step-end infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* ---- chunking ---- */
+  .doc-view{
+    margin-top:0.9rem; padding:0.9rem 1rem; background:var(--bg-sunken); border-radius:8px;
+    font-family:var(--font-mono); font-size:0.88rem; line-height:1.7; white-space:pre-wrap;
+  }
+  .doc-view mark{ border-radius:3px; padding:0.05em 0; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .chunk-list{ margin-top:1rem; display:grid; gap:0.6rem; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+  .chunk-card{ background:var(--bg-sunken); border-radius:8px; padding:0.7rem 0.85rem; border-left:4px solid var(--accent); }
+  .chunk-card .meta{ font-family:var(--font-mono); font-size:0.68rem; color:var(--ink-soft); margin-bottom:0.3rem; }
+  .chunk-card p{ margin:0; font-size:0.82rem; color:var(--ink); max-width:none; }
+
+  /* ---- scatter ---- */
+  .scatter{ position:relative; margin-top:1rem; height:280px; background:var(--bg-sunken); border-radius:10px; border:1px solid var(--line); overflow:hidden; }
+  .scatter .grid-line{ position:absolute; background:var(--line); opacity:0.5; }
+  .dot{
+    position:absolute; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%;
+    background:var(--accent); border:2px solid var(--bg-panel); cursor:pointer;
+  }
+  .dot.query{ background:var(--focus); width:16px; height:16px; margin:-8px 0 0 -8px; z-index:5; }
+  .dot.top{ box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent); }
+  .dot .lbl{ position:absolute; top:16px; left:50%; transform:translateX(-50%); font-family:var(--font-mono); font-size:0.65rem; color:var(--ink-soft); white-space:nowrap; }
+
+  .results{ margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; }
+  .result-row{ display:grid; grid-template-columns:1.6rem 1fr 4.2rem; gap:0.6rem; align-items:center; font-family:var(--font-mono); font-size:0.8rem; }
+  .result-row .rank{ color:var(--ink-soft); }
+  .result-row .track{ background:var(--bg-sunken); border-radius:5px; height:10px; overflow:hidden; }
+  .result-row .fill{ height:100%; background:var(--accent); }
+  .result-row.top .rank{ color:var(--accent); font-weight:700; }
+
+  pre.prompt-block{
+    margin:0.9rem 0 0; padding:1rem 1.1rem; background:var(--bg-sunken); border-radius:8px;
+    font-family:var(--font-mono); font-size:0.82rem; line-height:1.6; white-space:pre-wrap; overflow-x:auto;
+    border:1px solid var(--line);
+  }
+  pre.prompt-block .tag{ color:var(--accent); font-weight:600; }
+
+  /* ---- concept map ---- */
+  .part-c{ --accent:var(--amber); }
+  .map-wrap{ position:relative; margin-top:1.2rem; border:1px solid var(--line); border-radius:12px; background:var(--bg-panel); overflow:hidden; }
+  canvas#graphCanvas{ display:block; width:100%; height:460px; touch-action:none; }
+  .map-legend{ display:flex; gap:1.2rem; flex-wrap:wrap; padding:0.9rem 1.1rem; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:0.78rem; }
+  .cta-link{
+    display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none; margin-top:1.3rem;
+    background:var(--accent); color:var(--bg-panel); font-family:var(--font-mono); font-size:0.82rem;
+    font-weight:600; letter-spacing:0.02em; text-transform:uppercase; padding:0.65rem 1.1rem; border-radius:8px;
+  }
+  .cta-link:hover{ filter:brightness(1.1); }
+
+  footer{ padding:2.5rem 0 4rem; border-top:1px solid var(--line); margin-top:1rem; color:var(--ink-soft); font-size:0.88rem; }
+
+  .callout-strip{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-top:1.2rem; }
+  .callout-strip div{ background:var(--bg-panel); padding:1rem 1.1rem; }
+  .callout-strip .k{ font-family:var(--font-mono); font-size:1.5rem; color:var(--accent); font-weight:700; }
+  .callout-strip .l{ font-size:0.78rem; color:var(--ink-soft); margin-top:0.2rem; }
+</style>
+
+<div class="shell">
+  <header class="hero">
+    <div class="kicker"><span class="eyebrow">An interactive trace</span></div>
+    <h1>Byte to <em>Answer</em></h1>
+    <p class="lede">Type a sentence and watch it become bytes, then tokens, then vectors, then a prediction. Feed a model a document it has never seen, and watch retrieval hand it the missing facts. Every number on this page is computed live, in your browser, from whatever you type.</p>
+    <div class="legend">
+      <span class="legend-item"><span class="swatch" style="background:var(--amber)"></span>Part A — how a model reads &amp; writes</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--teal)"></span>Part B — how RAG gives it new facts</span>
+    </div>
+  </header>
+
+  <div class="grid-main">
+    <nav class="rail" aria-label="Sections">
+      <ol id="railList">
+        <li><a href="#s-intro" data-id="s-intro"><span class="num">·</span> Start<span class="dot"></span></a></li>
+        <li><a href="#s-bytes" data-id="s-bytes"><span class="num">01</span> Byte stream<span class="dot"></span></a></li>
+        <li><a href="#s-tokens" data-id="s-tokens"><span class="num">02</span> Tokenization<span class="dot"></span></a></li>
+        <li><a href="#s-embed" data-id="s-embed"><span class="num">03</span> Embeddings<span class="dot"></span></a></li>
+        <li><a href="#s-posenc" data-id="s-posenc"><span class="num">04</span> Positional encoding<span class="dot"></span></a></li>
+        <li><a href="#s-attention" data-id="s-attention"><span class="num">05</span> Self-attention<span class="dot"></span></a></li>
+        <li><a href="#s-ffn" data-id="s-ffn"><span class="num">06</span> Residual &amp; feed-forward<span class="dot"></span></a></li>
+        <li><a href="#s-stack" data-id="s-stack"><span class="num">07</span> Stacking blocks<span class="dot"></span></a></li>
+        <li><a href="#s-sampling" data-id="s-sampling"><span class="num">08</span> Sampling<span class="dot"></span></a></li>
+        <li class="divider" aria-hidden="true"></li>
+        <li><a href="#s-chunking" data-id="s-chunking"><span class="num">09</span> Chunking<span class="dot"></span></a></li>
+        <li><a href="#s-index" data-id="s-index"><span class="num">10</span> Vector index<span class="dot"></span></a></li>
+        <li><a href="#s-retrieval" data-id="s-retrieval"><span class="num">11</span> Retrieval<span class="dot"></span></a></li>
+        <li><a href="#s-prompt" data-id="s-prompt"><span class="num">12</span> Prompt assembly<span class="dot"></span></a></li>
+        <li><a href="#s-generate" data-id="s-generate"><span class="num">13</span> Grounded output<span class="dot"></span></a></li>
+        <li class="divider" aria-hidden="true"></li>
+        <li><a href="#s-map" data-id="s-map"><span class="num">·</span> Concept map<span class="dot"></span></a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="s-intro" style="padding:2rem 0 0;">
+        <label class="field" for="aInput">Type any sentence — it drives Part A end to end</label>
+        <textarea id="aInput" rows="2">Language models read one token at a time.</textarea>
+        <p class="soft" style="margin-top:0.6rem; font-size:0.88rem;">Every module below — bytes, tokens, the embedding strip, the attention grid, the sampler — recomputes from this exact text as you type.</p>
+      </section>
+
+      <div class="part part-a">
+        <ol class="path">
+
+          <li id="s-bytes">
+            <div class="marker">01</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 01</span>
+                <h3>The computer only sees bytes</h3>
+              </div>
+              <p class="desc">Before anything is a "word" to a model, it's a stream of <span class="term" data-tip="A byte is 8 bits — the unit computers store and move text in. Most text on the web is encoded as UTF-8.">bytes</span>. Here's your sentence in raw UTF-8, one cell per byte.</p>
+              <div class="byte-grid" id="aBytes"></div>
+              <p class="attn-note" id="aByteCount"></p>
+            </div>
+          </li>
+
+          <li id="s-tokens">
+            <div class="marker">02</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 02</span>
+                <h3>Bytes get grouped into tokens</h3>
+              </div>
+              <p class="desc">Real models use <span class="term" data-tip="Byte-Pair Encoding: a vocabulary of ~50,000–100,000 common byte sequences, learned by repeatedly merging the most frequent adjacent pair in a huge text corpus.">Byte-Pair Encoding (BPE)</span> or similar, trained on billions of words. This page uses a small illustrative stand-in — greedy prefix/suffix splitting — so you can see the idea: common word-pieces become single tokens, rare ones get split further. The dot (·) marks "start of a new word."</p>
+              <div class="token-chips" id="aTokens"></div>
+              <p class="attn-note" id="aTokenNote"></p>
+            </div>
+          </li>
+
+          <li id="s-embed">
+            <div class="marker">03</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 03</span>
+                <h3>Every token becomes a vector</h3>
+              </div>
+              <p class="desc">Click a token above. Each one maps to an <span class="term" data-tip="A list of numbers that represents meaning in a way a neural network can do math on. Real models use 768–12,288 dimensions, learned from data.">embedding</span> — here, a small 12-number vector, generated deterministically from the token itself so the demo is reproducible. In a trained model these numbers are learned so that tokens used in similar contexts end up with similar vectors.</p>
+              <p style="margin-top:0.9rem; font-family:var(--font-mono); font-size:0.85rem;">Selected token: <span id="aEmbedSelected" class="soft">—</span></p>
+              <div class="embed-strip" id="aEmbedStrip"></div>
+            </div>
+          </li>
+
+          <li id="s-posenc">
+            <div class="marker">04</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 04</span>
+                <h3>Telling the model where each token sits</h3>
+              </div>
+              <p class="desc">Attention on its own is order-blind: comparing Queries and Keys gives the same pairwise scores no matter what order the tokens arrived in, so "dog bites man" and "man bites dog" would look identical to it. The fix is a <span class="term" data-tip="A fixed vector added to each token's embedding, generated from its position in the sequence, so the model can tell tokens apart by order even though attention itself has no sense of order.">positional encoding</span> — a vector generated purely from a token's position (using interleaved sine and cosine waves at different frequencies) and added directly onto its embedding.</p>
+              <p class="desc">Each row below is one position's encoding — 12 values, colored by sign and size. Notice the leftmost columns oscillate fast (fine-grained position) and the right columns oscillate slowly (coarse position) — that mix is what lets the model recover exact and relative position from a fixed-size vector.</p>
+              <div id="aPosGrid" class="pos-grid"></div>
+              <p style="margin-top:1.1rem; font-family:var(--font-mono); font-size:0.85rem;">What actually enters the transformer for <span id="aPosSelected" class="soft">—</span>:</p>
+              <div class="stack-strip">
+                <div class="strip-row"><span class="strip-label">token embedding</span><div class="embed-strip" id="aPosEmbed"></div></div>
+                <div class="strip-op">+</div>
+                <div class="strip-row"><span class="strip-label">positional encoding</span><div class="embed-strip" id="aPosEnc"></div></div>
+                <div class="strip-op">=</div>
+                <div class="strip-row"><span class="strip-label">block input</span><div class="embed-strip" id="aPosSum"></div></div>
+              </div>
+            </div>
+          </li>
+
+          <li id="s-attention">
+            <div class="marker">05</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 05</span>
+                <h3>Tokens look at each other</h3>
+              </div>
+              <p class="desc"><span class="term" data-tip="Each token produces a Query, Key and Value vector. A token's Query is compared against every token's Key to decide how much attention to pay, then those weights blend the Values together.">Self-attention</span> lets each token pull information from every other token, weighted by relevance. Click a row to see what that token attends to (weights computed live via <span class="term" data-tip="Converts a list of scores into probabilities that sum to 1, emphasizing the largest values.">softmax</span> over toy Query·Key scores — first 10 tokens only, for readability).</p>
+              <p class="desc">Real transformers don't run this once — they run it several times in parallel, called <span class="term" data-tip="Splitting attention into several parallel 'heads', each with its own Query/Key/Value projections, so different heads can specialize in different kinds of relationships (e.g. one for nearby words, one for subject-verb links).">multi-head attention</span>, then concatenate the results and mix them with one more linear layer. Switch heads to see how the same tokens produce different attention patterns depending on which projection is looking at them.</p>
+              <div class="btn-row" id="aHeadTabs"></div>
+              <div class="attn-wrap"><div id="aAttnGrid"></div></div>
+              <p class="attn-note" id="aAttnFocusList">Click any row label to focus a token.</p>
+            </div>
+          </li>
+
+          <li id="s-ffn">
+            <div class="marker">06</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 06</span>
+                <h3>Keeping the signal, then thinking about it</h3>
+              </div>
+              <p class="desc">Two more ideas make this trainable at depth. A <span class="term" data-tip="The block's output is added to its own input before moving on, so information (and gradient, during training) always has an unobstructed path through, even if the attention or feed-forward layer contributes very little.">residual connection</span> adds each sub-layer's input back onto its output — a guaranteed bypass, so nothing gets lost even in a 100-layer-deep model. <span class="term" data-tip="Rescales a vector to zero mean and unit variance, then applies a learned scale and shift. Keeps values in a stable range as they pass through many stacked layers.">Layer normalization</span> then rescales the result before it moves on. Finally, a position-wise <span class="term" data-tip="A small two-layer network applied independently to every token: expand to a wider hidden size, apply a non-linearity, then contract back down. This is where much of a model's factual and pattern-matching capacity is thought to live.">feed-forward network</span> expands each token's vector, applies a non-linearity, and contracts it back — the same weights applied to every position.</p>
+              <figure class="diagram-figure">
+                <svg viewBox="0 0 320 520" role="img" aria-label="One transformer block: input splits into a residual bypass and multi-head attention, the two are added and normalized, then split again into a residual bypass and a feed-forward network, added and normalized once more to produce the block's output.">
+                  <defs>
+                    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                      <polygon points="0,0 10,5 0,10" fill="currentColor"></polygon>
+                    </marker>
+                  </defs>
+                  <text x="160" y="18" text-anchor="middle" font-size="12" fill="currentColor">block input x</text>
+                  <line x1="160" y1="26" x2="160" y2="50" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+                  <rect x="60" y="52" width="200" height="42" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                  <text x="160" y="78" text-anchor="middle" font-size="12" fill="currentColor">multi-head attention</text>
+                  <path d="M60,73 C10,73 10,140 60,140" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"></path>
+                  <text x="26" y="108" text-anchor="middle" font-size="10" fill="currentColor" transform="rotate(-90 26 108)">residual copy of x</text>
+
+                  <line x1="160" y1="94" x2="160" y2="122" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+                  <circle cx="160" cy="140" r="14" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+                  <text x="160" y="145" text-anchor="middle" font-size="14" fill="currentColor">+</text>
+                  <line x1="60" y1="140" x2="146" y2="140" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+                  <line x1="160" y1="154" x2="160" y2="176" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+                  <rect x="60" y="178" width="200" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                  <text x="160" y="200" text-anchor="middle" font-size="12" fill="currentColor">add &amp; normalize</text>
+
+                  <line x1="160" y1="212" x2="160" y2="236" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+                  <rect x="60" y="238" width="200" height="58" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                  <text x="160" y="260" text-anchor="middle" font-size="12" fill="currentColor">feed-forward</text>
+                  <text x="160" y="276" text-anchor="middle" font-size="9.5" fill="currentColor">expand → ReLU → contract</text>
+                  <path d="M60,255 C10,255 10,330 60,330" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"></path>
+                  <text x="26" y="292" text-anchor="middle" font-size="10" fill="currentColor" transform="rotate(-90 26 292)">residual copy</text>
+
+                  <line x1="160" y1="296" x2="160" y2="314" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+                  <circle cx="160" cy="330" r="14" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+                  <text x="160" y="335" text-anchor="middle" font-size="14" fill="currentColor">+</text>
+                  <line x1="60" y1="330" x2="146" y2="330" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+
+                  <line x1="160" y1="344" x2="160" y2="366" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+                  <rect x="60" y="368" width="200" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+                  <text x="160" y="390" text-anchor="middle" font-size="12" fill="currentColor">add &amp; normalize</text>
+
+                  <line x1="160" y1="402" x2="160" y2="426" stroke="currentColor" stroke-width="1.5" marker-end="url(#arr)"></line>
+                  <text x="160" y="442" text-anchor="middle" font-size="12" fill="currentColor">block output</text>
+                  <line x1="160" y1="450" x2="160" y2="474" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3" marker-end="url(#arr)"></line>
+                  <text x="160" y="492" text-anchor="middle" font-size="11" fill="var(--accent)">→ fed to the next block</text>
+                </svg>
+                <figcaption>One transformer block: attention and feed-forward each sit beside a residual bypass, so a copy of the input always reaches the output directly, before every sub-layer's result is renormalized.</figcaption>
+              </figure>
+              <p class="desc" style="margin-top:1rem;">Traced for <span id="aFfnSelected" class="soft">—</span>, using this demo's fixed (untrained) weights:</p>
+              <div class="stack-strip" id="aFfnChain"></div>
+            </div>
+          </li>
+
+          <li id="s-stack">
+            <div class="marker">07</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 07</span>
+                <h3>Stacking the block, many times over</h3>
+              </div>
+              <p class="desc">A real model doesn't run one block — it runs the same shape of block, with independently learned weights, one after another. GPT-2 small stacks 12, GPT-3 stacks 96. Each layer refines the representation a little further: early layers tend to pick up on syntax and local structure, later ones on longer-range meaning.</p>
+              <div class="slider-field" style="max-width:320px;">
+                <label class="field" for="aStackDepth">Layers stacked <span class="val" id="aStackDepthVal">6</span></label>
+                <input type="range" id="aStackDepth" min="1" max="24" step="1" value="6">
+              </div>
+              <figure class="diagram-figure">
+                <svg id="stackSvg" viewBox="0 0 320 60" role="img" aria-label="A stack of transformer blocks, output of one feeding directly into the next."></svg>
+                <figcaption>The same block shape repeated N times; this demo reuses one fixed set of weights for every layer to keep the arithmetic simple, but a real model learns separate weights per layer.</figcaption>
+              </figure>
+              <p class="desc" style="margin-top:1rem;">Only the feed-forward + residual + normalize half is chained here (attention is stage 05's job) — watch <span id="aStackSelected" class="soft">—</span>'s vector keep shifting the deeper it goes:</p>
+              <div class="embed-strip" id="aStackStrip"></div>
+            </div>
+          </li>
+
+          <li id="s-sampling">
+            <div class="marker">08</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 08</span>
+                <h3>Picking the next token</h3>
+              </div>
+              <p class="desc">The model outputs one probability per vocabulary token. <span class="term" data-tip="Divides the logits before softmax. Low temperature (→0) makes the model greedy and repetitive; high temperature makes it more random.">Temperature</span>, <span class="term" data-tip="Keep only the K highest-probability candidates, then renormalize.">top-k</span> and <span class="term" data-tip="Keep the smallest set of candidates whose probabilities add up to at least P, then renormalize. Also called nucleus sampling.">top-p</span> reshape that distribution before a token is drawn. This toy vocabulary is a small hand-built table so the demo stays legible — the math (softmax, filtering, sampling) is real.</p>
+              <div class="row">
+                <div class="slider-field">
+                  <label class="field" for="aTemp">Temperature <span class="val" id="aTempVal">0.8</span></label>
+                  <input type="range" id="aTemp" min="0.1" max="2" step="0.1" value="0.8">
+                </div>
+                <div class="slider-field">
+                  <label class="field" for="aTopK">Top-k <span class="val" id="aTopKVal">5</span></label>
+                  <input type="range" id="aTopK" min="1" max="6" step="1" value="5">
+                </div>
+                <div class="slider-field">
+                  <label class="field" for="aTopP">Top-p <span class="val" id="aTopPVal">1.0</span></label>
+                  <input type="range" id="aTopP" min="0.1" max="1" step="0.05" value="1.0">
+                </div>
+              </div>
+              <div class="bars" id="aBars"></div>
+              <div class="btn-row">
+                <button class="solid" id="aStepBtn" type="button">Sample one token</button>
+                <button id="aAutoBtn" type="button">Auto-generate</button>
+                <button id="aResetBtn" type="button">Reset</button>
+              </div>
+              <div class="gen-output mono" id="aOutput"></div>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+
+      <div class="transition-note" id="s-hallucination">
+        <p><strong>This model only knows what got baked into its weights during training.</strong> Ask it about a document it has never seen — your team's internal spec, this morning's report — and it will guess fluently and confidently. That guess is a <span class="term" data-tip="A confident, fluent output that is factually wrong or unsupported — because the model is still just predicting plausible next tokens, not looking anything up.">hallucination</span>.</p>
+        <p>Retrieval-Augmented Generation (RAG) doesn't retrain the model. It finds the relevant text at question-time and hands it to the model as extra context, right before generation. Same Stage 08 sampler — different, better-informed input.</p>
+      </div>
+
+      <div class="part part-b">
+        <div class="part-head">
+          <span class="eyebrow">Part B</span>
+          <h2>Grounding the model in a real document</h2>
+          <p class="soft">Below is a short internal spec for a fictional project, invented for this page — no model has ever been trained on it. Edit it, ask it a question, and watch retrieval find the right passage before generation runs.</p>
+        </div>
+
+        <label class="field" for="bDoc">Source document</label>
+        <textarea id="bDoc" rows="9"></textarea>
+
+        <ol class="path" style="margin-top:2rem;">
+
+          <li id="s-chunking">
+            <div class="marker">09</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 09</span>
+                <h3>Splitting the document into chunks</h3>
+              </div>
+              <p class="desc">Documents are too long to embed as one block, so they're cut into <span class="term" data-tip="A contiguous slice of a document, usually a few hundred characters or tokens, small enough to embed meaningfully and retrieve precisely.">chunks</span> — typically with some overlap, so a fact sitting on a boundary doesn't get orphaned.</p>
+              <div class="row">
+                <div class="slider-field">
+                  <label class="field" for="bChunkSize">Chunk size <span class="val" id="bChunkSizeVal">160</span> chars</label>
+                  <input type="range" id="bChunkSize" min="60" max="360" step="10" value="160">
+                </div>
+                <div class="slider-field">
+                  <label class="field" for="bOverlap">Overlap <span class="val" id="bOverlapVal">30</span> chars</label>
+                  <input type="range" id="bOverlap" min="0" max="120" step="10" value="30">
+                </div>
+              </div>
+              <div class="doc-view" id="bDocHighlighted"></div>
+              <div class="chunk-list" id="bChunkList"></div>
+            </div>
+          </li>
+
+          <li id="s-index">
+            <div class="marker">10</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 10</span>
+                <h3>Embedding chunks into a vector index</h3>
+              </div>
+              <p class="desc">Each chunk is embedded (here: the average of its tokens' toy vectors — a real system uses a trained embedding model) and stored in a <span class="term" data-tip="A database built for fast nearest-neighbor search over vectors — e.g. FAISS, HNSW-based indexes, or a managed vector database.">vector index</span>. Plotted here in 2D for intuition; real indexes use hundreds of dimensions and approximate nearest-neighbor search to stay fast at scale.</p>
+              <div class="scatter" id="bScatter"></div>
+            </div>
+          </li>
+
+          <li id="s-retrieval">
+            <div class="marker">11</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 11</span>
+                <h3>Retrieving the closest chunks</h3>
+              </div>
+              <p class="desc">Ask a question. It's embedded the same way, then ranked against every chunk by <span class="term" data-tip="A measure of how similarly two vectors point, from -1 (opposite) to 1 (identical direction) — independent of vector length.">cosine similarity</span>. Because this demo's vectors are built from shared words rather than learned meaning, retrieval works best when your question reuses a word from the passage — a real embedding model would also catch a paraphrase.</p>
+              <label class="field" for="bQuery">Your question</label>
+              <input type="text" id="bQuery" value="What is the coolant flow rate?">
+              <div class="row">
+                <div class="slider-field">
+                  <label class="field" for="bTopK">Retrieve top <span class="val" id="bTopKVal">2</span></label>
+                  <input type="range" id="bTopK" min="1" max="5" step="1" value="2">
+                </div>
+              </div>
+              <div class="results" id="bResults"></div>
+            </div>
+          </li>
+
+          <li id="s-prompt">
+            <div class="marker">12</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 12</span>
+                <h3>Assembling the augmented prompt</h3>
+              </div>
+              <p class="desc">The retrieved chunks are stitched into the model's <span class="term" data-tip="The full text a model actually reads before generating — system instructions, retrieved passages, chat history, and the current question, all packed into a fixed token budget.">context window</span> alongside the question and a system instruction. The model itself is unchanged — only its input got richer.</p>
+              <pre class="prompt-block" id="bPrompt"></pre>
+            </div>
+          </li>
+
+          <li id="s-generate">
+            <div class="marker">13</div>
+            <div class="module">
+              <div class="module-head">
+                <span class="eyebrow">Stage 13</span>
+                <h3>Generating the grounded answer</h3>
+              </div>
+              <p class="desc">The same autoregressive sampler from Stage 08 runs again — token by token — except now the correct fact is sitting in its context, so it has something true to draw on instead of guessing.</p>
+              <div class="btn-row"><button class="solid" id="bGenBtn" type="button">Generate answer</button></div>
+              <div class="gen-output mono" id="bAnswer"></div>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+
+      <div class="callout-strip">
+        <div><div class="k">13</div><div class="l">stages traced, byte to grounded answer</div></div>
+        <div><div class="k">2</div><div class="l">signal paths: raw generation, then retrieval-augmented</div></div>
+        <div><div class="k">0</div><div class="l">numbers on this page are hard-coded — all computed live</div></div>
+      </div>
+
+      <section id="s-map" class="part" style="border-top:1px solid var(--line); margin-top:1rem;">
+        <div class="part-head">
+          <span class="eyebrow">What's next</span>
+          <h2>Every concept here is one node in a bigger graph</h2>
+          <p class="soft">This page traced a single path. The concepts on it don't stand alone — attention shows up again in fine-tuning, retrieval connects to search systems built long before RAG, hallucination motivates half the field. Drag the nodes below for a preview of the shape, then open the full map: click any concept for a plain explanation, and jump straight to its stage above where one exists.</p>
+          <a class="cta-link" href="concept-atlas.html" target="_blank" rel="noopener">Open the Concept Atlas →</a>
+        </div>
+        <div class="map-wrap">
+          <canvas id="graphCanvas"></canvas>
+          <div class="map-legend">
+            <span class="legend-item"><span class="swatch" style="background:var(--amber)"></span>Generation concepts</span>
+            <span class="legend-item"><span class="swatch" style="background:var(--teal)"></span>Retrieval concepts</span>
+            <span class="legend-item"><span class="swatch" style="background:var(--ink-soft)"></span>Shared concepts</span>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p>All tokenization, embedding, attention, similarity and sampling math on this page runs client-side in illustrative, reduced form — built to make the mechanism visible, not to reproduce a production model. Refresh to reset every stage to its defaults.</p>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- math utils ---------- */
+  function hashString(str){
+    var h = 2166136261;
+    for (var i=0; i<str.length; i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0);
+  }
+  function mulberry32(seed){
+    var a = seed >>> 0;
+    return function(){
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function pseudoEmbed(key, dims){
+    var rand = mulberry32(hashString(key));
+    var v = [];
+    for (var i=0; i<dims; i++){ v.push(rand()*2-1); }
+    return v;
+  }
+  function dot(a,b){ var s=0; for(var i=0;i<a.length;i++){ s+=a[i]*b[i]; } return s; }
+  function norm(a){ return Math.sqrt(dot(a,a)) || 1e-9; }
+  function cosineSim(a,b){ return dot(a,b)/(norm(a)*norm(b)); }
+  function softmax(arr, temp){
+    var t = temp || 1;
+    var scaled = arr.map(function(x){ return x/t; });
+    var max = Math.max.apply(null, scaled);
+    var exps = scaled.map(function(x){ return Math.exp(x-max); });
+    var sum = exps.reduce(function(a,b){ return a+b; }, 0);
+    return exps.map(function(x){ return x/sum; });
+  }
+  function clamp(x,lo,hi){ return Math.max(lo, Math.min(hi, x)); }
+  function addVec(a,b){ return a.map(function(x,i){ return x+b[i]; }); }
+  function layerNorm(v){
+    var n = v.length;
+    var mean = v.reduce(function(s,x){ return s+x; }, 0) / n;
+    var variance = v.reduce(function(s,x){ return s+(x-mean)*(x-mean); }, 0) / n;
+    var std = Math.sqrt(variance + 1e-5);
+    return v.map(function(x){ return (x-mean)/std; });
+  }
+  function relu(v){ return v.map(function(x){ return Math.max(0,x); }); }
+  function randMatrix(rows, cols, seedKey, scale){
+    var rand = mulberry32(hashString(seedKey));
+    var m = [];
+    for (var r=0; r<rows; r++){
+      var row = [];
+      for (var c=0; c<cols; c++){ row.push((rand()*2-1)*scale); }
+      m.push(row);
+    }
+    return m;
+  }
+  function randVec(n, seedKey, scale){
+    var rand = mulberry32(hashString(seedKey));
+    var v = [];
+    for (var i=0;i<n;i++){ v.push((rand()*2-1)*scale); }
+    return v;
+  }
+  function matVecAdd(x, W, b){
+    var rows = W.length, cols = W[0].length;
+    var out = new Array(cols).fill(0);
+    for (var i=0;i<rows;i++){
+      var xi = x[i];
+      for (var j=0;j<cols;j++){ out[j] += xi*W[i][j]; }
+    }
+    for (var j=0;j<cols;j++){ out[j] += b[j]; }
+    return out;
+  }
+  function posEnc(pos, dims){
+    var v = [];
+    for (var i=0; i<dims; i++){
+      var pairIndex = Math.floor(i/2);
+      var freq = 1 / Math.pow(10000, (2*pairIndex)/dims);
+      v.push(i % 2 === 0 ? Math.sin(pos*freq) : Math.cos(pos*freq));
+    }
+    return v;
+  }
+
+  var ATTN_DIM = 12, NUM_HEADS = 4;
+  var FFN_IN = 12, FFN_HIDDEN = 48;
+  var W1 = randMatrix(FFN_IN, FFN_HIDDEN, 'ffn-w1', 0.4);
+  var B1 = randVec(FFN_HIDDEN, 'ffn-b1', 0.15);
+  var W2 = randMatrix(FFN_HIDDEN, FFN_IN, 'ffn-w2', 0.2);
+  var B2 = randVec(FFN_IN, 'ffn-b2', 0.15);
+
+  /* ---------- tokenizer ---------- */
+  var SUFFIXES = ["ization","ations","ology","ative","ivity","ility","ation","ition","tion","sion",
+                   "ers","est","ess","ful","ment","ness","able","ible","less","ous","ive","ing","er","ed","ly","al","s"];
+  function splitWord(word){
+    if (word.length <= 5) return [word];
+    var lower = word.toLowerCase();
+    for (var i=0;i<SUFFIXES.length;i++){
+      var suf = SUFFIXES[i];
+      if (lower.length - suf.length >= 2 && lower.slice(-suf.length) === suf){
+        var cut = word.length - suf.length;
+        return [word.slice(0,cut), word.slice(cut)];
+      }
+    }
+    return [word];
+  }
+  function tokenize(text){
+    var raw = text.match(/\s+|[A-Za-z]+|[^\sA-Za-z]/g) || [];
+    var tokens = [];
+    var pendingSpace = false;
+    raw.forEach(function(piece){
+      if (/^\s+$/.test(piece)){ pendingSpace = true; return; }
+      var isWord = /^[A-Za-z]+$/.test(piece);
+      var pieces = isWord ? splitWord(piece) : [piece];
+      pieces.forEach(function(p, idx){
+        var startOfWord = idx===0 && (pendingSpace || tokens.length===0);
+        tokens.push({ text: p, startOfWord: startOfWord });
+      });
+      pendingSpace = false;
+    });
+    return tokens;
+  }
+  function tokenKey(tok){ return (tok.startOfWord ? ' ' : '') + tok.text.toLowerCase(); }
+  function tokenId(tok){ return hashString(tokenKey(tok)) % 50257; }
+
+  /* ================= PART A ================= */
+  var aInput = document.getElementById('aInput');
+  var aBytesEl = document.getElementById('aBytes');
+  var aByteCount = document.getElementById('aByteCount');
+  var aTokensEl = document.getElementById('aTokens');
+  var aTokenNote = document.getElementById('aTokenNote');
+  var aEmbedStrip = document.getElementById('aEmbedStrip');
+  var aEmbedSelected = document.getElementById('aEmbedSelected');
+  var aAttnGrid = document.getElementById('aAttnGrid');
+  var aAttnFocusList = document.getElementById('aAttnFocusList');
+  var aHeadTabs = document.getElementById('aHeadTabs');
+  var aPosGrid = document.getElementById('aPosGrid');
+  var aPosSelected = document.getElementById('aPosSelected');
+  var aPosEmbed = document.getElementById('aPosEmbed');
+  var aPosEnc = document.getElementById('aPosEnc');
+  var aPosSum = document.getElementById('aPosSum');
+  var aFfnSelected = document.getElementById('aFfnSelected');
+  var aFfnChain = document.getElementById('aFfnChain');
+  var aStackDepth = document.getElementById('aStackDepth');
+  var aStackDepthVal = document.getElementById('aStackDepthVal');
+  var stackSvg = document.getElementById('stackSvg');
+  var aStackSelected = document.getElementById('aStackSelected');
+  var aStackStrip = document.getElementById('aStackStrip');
+
+  var aState = { tokens: [], selectedIdx: 0, focusRow: 0, head: 0 };
+
+  function workingTokens(){ return aState.tokens.slice(0, 10); }
+  function selIndexInWorking(){
+    var w = workingTokens();
+    if (!w.length) return 0;
+    return Math.min(aState.selectedIdx, w.length-1);
+  }
+  function selectedWorkingToken(){
+    var w = workingTokens();
+    return w.length ? w[selIndexInWorking()] : null;
+  }
+  function tokenLabel(tok){ return (tok.startOfWord?'· ':'') + tok.text; }
+  function stripCellsHTML(vec, accentVar){
+    return vec.map(function(v){
+      return '<div class="embed-cell" style="background:'+colorForValue(v, accentVar)+'" title="'+v.toFixed(2)+'"></div>';
+    }).join('');
+  }
+
+  function renderBytes(text){
+    var bytes = new TextEncoder().encode(text);
+    aBytesEl.innerHTML = '';
+    var shown = Array.prototype.slice.call(bytes, 0, 48);
+    shown.forEach(function(b){
+      var cell = document.createElement('div');
+      cell.className = 'byte-cell';
+      cell.innerHTML = '<span class="hex">0x'+b.toString(16).padStart(2,'0').toUpperCase()+'</span><span class="dec">'+b+'</span>';
+      aBytesEl.appendChild(cell);
+    });
+    aByteCount.textContent = bytes.length + ' byte' + (bytes.length===1?'':'s') + (bytes.length>48 ? ' (first 48 shown)' : '') + ' — UTF-8 encoded.';
+  }
+
+  function renderTokens(text){
+    var tokens = tokenize(text);
+    aState.tokens = tokens;
+    if (aState.selectedIdx >= tokens.length) aState.selectedIdx = 0;
+    aTokensEl.innerHTML = '';
+    tokens.forEach(function(tok, i){
+      var chip = document.createElement('span');
+      chip.className = 'chip' + (i===aState.selectedIdx ? ' selected' : '');
+      chip.innerHTML = (tok.startOfWord ? '<span class="space-dot">·</span>' : '') + escapeHtml(tok.text) + '<small>id '+tokenId(tok)+'</small>';
+      chip.addEventListener('click', function(){ aState.selectedIdx = i; onSelectionChange(); highlightSelectedChip(); });
+      aTokensEl.appendChild(chip);
+    });
+    aTokenNote.textContent = tokens.length + ' token' + (tokens.length===1?'':'s') + ' from ' + text.length + ' characters. Click one to inspect its embedding.';
+  }
+  function highlightSelectedChip(){
+    Array.prototype.forEach.call(aTokensEl.children, function(chip,i){
+      chip.classList.toggle('selected', i===aState.selectedIdx);
+    });
+  }
+  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function colorForValue(v, accentVar){
+    var mag = clamp(Math.abs(v), 0, 1);
+    var alpha = 0.15 + mag*0.75;
+    return 'color-mix(in srgb, ' + accentVar + ' ' + Math.round(alpha*100) + '%, var(--bg-sunken))';
+  }
+
+  function renderEmbed(){
+    var tok = aState.tokens[aState.selectedIdx];
+    if (!tok){ aEmbedStrip.innerHTML=''; aEmbedSelected.textContent='—'; return; }
+    aEmbedSelected.textContent = (tok.startOfWord?'· ':'') + tok.text;
+    var vec = pseudoEmbed(tokenKey(tok)+'|embed', 12);
+    aEmbedStrip.innerHTML = '';
+    vec.forEach(function(v,i){
+      var cell = document.createElement('div');
+      cell.className = 'embed-cell';
+      cell.style.background = colorForValue(v, 'var(--amber)');
+      cell.title = 'dim '+i+': '+v.toFixed(2);
+      aEmbedStrip.appendChild(cell);
+    });
+  }
+
+  function computeAttentionData(tokens, head){
+    var Q = tokens.map(function(t){ return pseudoEmbed(tokenKey(t)+'|Q'+head, ATTN_DIM); });
+    var K = tokens.map(function(t){ return pseudoEmbed(tokenKey(t)+'|K'+head, ATTN_DIM); });
+    var V = tokens.map(function(t){ return pseudoEmbed(tokenKey(t)+'|V'+head, ATTN_DIM); });
+    var scoreRows = tokens.map(function(_,i){
+      var raw = tokens.map(function(__,j){ return dot(Q[i],K[j]) / Math.sqrt(ATTN_DIM); });
+      return softmax(raw, 1);
+    });
+    return { tokens: tokens, Q:Q, K:K, V:V, scoreRows: scoreRows };
+  }
+  function attnOutputFor(data, idx){
+    var weights = data.scoreRows[idx];
+    var out = new Array(ATTN_DIM).fill(0);
+    weights.forEach(function(w,j){
+      var v = data.V[j];
+      for (var d=0; d<ATTN_DIM; d++){ out[d] += w*v[d]; }
+    });
+    return out;
+  }
+
+  function renderHeadTabs(){
+    aHeadTabs.innerHTML = '';
+    for (var h=0; h<NUM_HEADS; h++){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Head ' + (h+1);
+      btn.className = h===aState.head ? 'active' : '';
+      (function(h){
+        btn.addEventListener('click', function(){
+          aState.head = h;
+          Array.prototype.forEach.call(aHeadTabs.children, function(b,i){ b.classList.toggle('active', i===h); });
+          renderAttention();
+          renderFfnChain();
+          renderStack();
+        });
+      })(h);
+      aHeadTabs.appendChild(btn);
+    }
+  }
+
+  function renderAttention(){
+    var tokens = workingTokens();
+    if (tokens.length < 2){ aAttnGrid.innerHTML = '<p class="soft" style="font-size:0.85rem;">Type at least two tokens to see attention.</p>'; aState.attnData = null; return; }
+    var data = computeAttentionData(tokens, aState.head);
+    aState.attnData = data;
+    var scoreRows = data.scoreRows;
+    if (aState.focusRow >= tokens.length) aState.focusRow = 0;
+
+    var html = '<table class="attn"><thead><tr><th></th>';
+    tokens.forEach(function(t){ html += '<th>'+escapeHtml((t.startOfWord?'·':'')+t.text)+'</th>'; });
+    html += '</tr></thead><tbody>';
+    scoreRows.forEach(function(row, i){
+      html += '<tr><td class="rowlabel mono mono" data-row="'+i+'" style="cursor:pointer;">'+escapeHtml((tokens[i].startOfWord?'·':'')+tokens[i].text)+'</td>';
+      row.forEach(function(w){
+        html += '<td style="background:'+colorForValue(w*2.2,'var(--amber)')+'" title="'+w.toFixed(3)+'"></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    aAttnGrid.innerHTML = html;
+
+    Array.prototype.forEach.call(aAttnGrid.querySelectorAll('td.rowlabel'), function(td){
+      td.addEventListener('click', function(){ aState.focusRow = parseInt(td.getAttribute('data-row'),10); showFocus(); });
+    });
+    function showFocus(){
+      var i = aState.focusRow;
+      var parts = scoreRows[i].map(function(w,j){ return escapeHtml((tokens[j].startOfWord?'·':'')+tokens[j].text)+' <span class="mono soft">'+(w*100).toFixed(0)+'%</span>'; });
+      aAttnFocusList.innerHTML = '<strong>'+escapeHtml((tokens[i].startOfWord?'·':'')+tokens[i].text)+'</strong> attends to: ' + parts.join(' · ');
+    }
+    showFocus();
+  }
+
+  function renderPosGrid(){
+    var tokens = workingTokens();
+    var selIdx = selIndexInWorking();
+    aPosGrid.innerHTML = '';
+    tokens.forEach(function(tok, i){
+      var row = document.createElement('div');
+      row.className = 'pos-row' + (i===selIdx ? ' is-selected' : '');
+      var enc = posEnc(i, 12);
+      row.innerHTML = '<span class="pos-label">pos '+i+' · '+escapeHtml(tokenLabel(tok))+'</span><div class="embed-strip">'+stripCellsHTML(enc, 'var(--amber)')+'</div>';
+      aPosGrid.appendChild(row);
+    });
+
+    var tok = selectedWorkingToken();
+    if (!tok){
+      aPosSelected.textContent = '—'; aPosEmbed.innerHTML=''; aPosEnc.innerHTML=''; aPosSum.innerHTML='';
+      return;
+    }
+    aPosSelected.textContent = tokenLabel(tok);
+    var embedVec = pseudoEmbed(tokenKey(tok)+'|embed', 12);
+    var encVec = posEnc(selIdx, 12);
+    var sumVec = addVec(embedVec, encVec);
+    aPosEmbed.innerHTML = stripCellsHTML(embedVec, 'var(--amber)');
+    aPosEnc.innerHTML = stripCellsHTML(encVec, 'var(--amber)');
+    aPosSum.innerHTML = stripCellsHTML(sumVec, 'var(--amber)');
+  }
+
+  function blockInputFor(tok, idx){
+    return addVec(pseudoEmbed(tokenKey(tok)+'|embed', 12), posEnc(idx, 12));
+  }
+
+  function renderFfnChain(){
+    var tok = selectedWorkingToken();
+    if (!tok || !aState.attnData){
+      aFfnSelected.textContent = '—'; aFfnChain.innerHTML = '<p class="soft" style="font-size:0.85rem;">Type at least two tokens above to trace this stage.</p>';
+      return;
+    }
+    var idx = selIndexInWorking();
+    aFfnSelected.textContent = tokenLabel(tok);
+
+    var x = blockInputFor(tok, idx);
+    var attnOut = attnOutputFor(aState.attnData, idx);
+    var normed1 = layerNorm(addVec(x, attnOut));
+    var hidden = relu(matVecAdd(normed1, W1, B1));
+    var ffnOut = matVecAdd(hidden, W2, B2);
+    var normed2 = layerNorm(addVec(normed1, ffnOut));
+
+    function row(label, vec){
+      return '<div class="strip-row"><span class="strip-label">'+label+'</span><div class="embed-strip'+(vec.length>16?' wide':'')+'">'+stripCellsHTML(vec, 'var(--accent)')+'</div></div>';
+    }
+    aFfnChain.innerHTML =
+      row('block input (embedding + position)', x) +
+      row('attention output — head '+(aState.head+1), attnOut) +
+      row('+ residual, normalized', normed1) +
+      row('feed-forward hidden (48-dim, post-ReLU)', hidden) +
+      row('feed-forward output (back to 12-dim)', ffnOut) +
+      row('+ residual, normalized — block output', normed2);
+
+    aState.blockOutput = normed2;
+  }
+
+  function buildStackSvg(depth){
+    var boxW=34, boxH=34, gap=14, startX=10, y=13;
+    var parts = ['<defs><marker id="stackArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" fill="currentColor"></polygon></marker></defs>'];
+    for (var i=0;i<depth;i++){
+      var x = startX + i*(boxW+gap);
+      parts.push('<rect x="'+x+'" y="'+y+'" width="'+boxW+'" height="'+boxH+'" rx="4" fill="none" stroke="currentColor" stroke-width="1.3"></rect>');
+      parts.push('<text x="'+(x+boxW/2)+'" y="'+(y+boxH/2+4)+'" text-anchor="middle" font-size="9" fill="currentColor">'+(i+1)+'</text>');
+      if (i < depth-1){
+        parts.push('<line x1="'+(x+boxW)+'" y1="'+(y+boxH/2)+'" x2="'+(x+boxW+gap)+'" y2="'+(y+boxH/2)+'" stroke="currentColor" stroke-width="1.3" marker-end="url(#stackArr)"></line>');
+      }
+    }
+    var lastX = startX + (depth-1)*(boxW+gap) + boxW;
+    parts.push('<line x1="'+lastX+'" y1="'+(y+boxH/2)+'" x2="'+(lastX+18)+'" y2="'+(y+boxH/2)+'" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#stackArr)"></line>');
+    var totalW = lastX + 26;
+    return { markup: parts.join(''), width: totalW, height: y+boxH+14 };
+  }
+
+  function chainedVector(depth){
+    var tok = selectedWorkingToken();
+    if (!tok) return null;
+    var idx = selIndexInWorking();
+    var v = blockInputFor(tok, idx);
+    for (var i=0;i<depth;i++){
+      var hidden = relu(matVecAdd(v, W1, B1));
+      var ffnOut = matVecAdd(hidden, W2, B2);
+      v = layerNorm(addVec(v, ffnOut));
+    }
+    return v;
+  }
+
+  function renderStack(){
+    var depth = parseInt(aStackDepth.value, 10);
+    var built = buildStackSvg(depth);
+    stackSvg.setAttribute('viewBox', '0 0 '+built.width+' '+built.height);
+    stackSvg.innerHTML = built.markup;
+
+    var tok = selectedWorkingToken();
+    if (!tok){ aStackSelected.textContent = '—'; aStackStrip.innerHTML = ''; return; }
+    aStackSelected.textContent = tokenLabel(tok);
+    var vec = chainedVector(depth);
+    aStackStrip.innerHTML = stripCellsHTML(vec, 'var(--amber)');
+  }
+
+  function onSelectionChange(){
+    renderEmbed();
+    renderPosGrid();
+    renderFfnChain();
+    renderStack();
+  }
+
+  function refreshPartA(){
+    var text = aInput.value || '';
+    renderBytes(text);
+    renderTokens(text);
+    renderEmbed();
+    renderAttention();
+    renderPosGrid();
+    renderFfnChain();
+    renderStack();
+  }
+  aInput.addEventListener('input', refreshPartA);
+  renderHeadTabs();
+  aStackDepth.addEventListener('input', function(){
+    aStackDepthVal.textContent = this.value;
+    renderStack();
+  });
+
+  /* ---- sampling ---- */
+  var CONT_TABLE = {
+    "the": [["model",2.1],["data",1.8],["system",1.6],["user",1.2],["network",1.0],["output",0.9]],
+    "model": [["learns",2.0],["predicts",1.9],["generates",1.9],["processes",1.3],["reads",1.1]],
+    "learns": [["patterns",1.8],["from",2.0],["quickly",1.0],["slowly",0.6]],
+    "from": [["data",2.2],["text",1.6],["examples",1.4],["context",1.2]],
+    "data": [["and",1.5],["to",1.3],[".",1.9],["about",0.8]],
+    "generates": [["text",2.0],["tokens",1.7],["output",1.5],["a",1.0]],
+    "predicts": [["the",1.9],["next",2.1],["a",1.0]],
+    "next": [["token",2.3],["word",1.8],["step",1.1]],
+    "token": [[".",2.0],["given",1.2],["at",0.9]],
+    "processes": [["input",1.9],["language",1.7],["sequences",1.2]],
+    "reads": [["text",1.9],["tokens",1.7],["input",1.3]],
+    "text": [[".",1.8],["and",1.2],["tokens",1.0],["into",0.9]],
+    "system": [["that",1.5],["processes",1.4],[".",1.1]],
+    "network": [["that",1.4],["learns",1.5],[".",1.0]],
+    "patterns": [["in",1.7],["from",1.1],[".",1.0]],
+    "in": [["language",1.7],["data",1.4],["context",1.0]],
+    "language": [[".",1.6],["models",1.9],["and",0.9]],
+    "models": [["learn",1.7],["predict",1.6],[".",1.1]],
+    "__default__": [["the",1.0],["a",0.9],["and",0.8],["of",0.7],["model",0.6],["data",0.6],[".",1.4]]
+  };
+  var END_TOKEN = ".";
+  var aSamplerState = { history: [], lastWord: null, running:false, timer:null };
+
+  function lastWordOf(text){
+    var m = text.trim().toLowerCase().match(/([a-z]+)[^a-z]*$/);
+    return m ? m[1] : null;
+  }
+  function candidatesFor(word){
+    var table = CONT_TABLE[word] || CONT_TABLE.__default__;
+    return table.map(function(pair){ return { word: pair[0], logit: pair[1] }; });
+  }
+  function currentDistribution(){
+    var word = aSamplerState.lastWord || lastWordOf(aInput.value) || 'the';
+    var cands = candidatesFor(word);
+    var temp = parseFloat(document.getElementById('aTemp').value);
+    var k = parseInt(document.getElementById('aTopK').value,10);
+    var p = parseFloat(document.getElementById('aTopP').value);
+    var logits = cands.map(function(c){ return c.logit; });
+    var probs = softmax(logits, temp);
+    var combined = cands.map(function(c,i){ return { word:c.word, prob:probs[i] }; });
+    combined.sort(function(a,b){ return b.prob-a.prob; });
+    combined = combined.slice(0, Math.min(k, combined.length));
+    var sum = combined.reduce(function(s,c){ return s+c.prob; }, 0);
+    combined = combined.map(function(c){ return { word:c.word, prob:c.prob/sum }; });
+    var cum = 0, cutoff = combined.length;
+    for (var i=0;i<combined.length;i++){ cum += combined[i].prob; if (cum >= p){ cutoff = i+1; break; } }
+    combined = combined.slice(0, cutoff);
+    sum = combined.reduce(function(s,c){ return s+c.prob; }, 0);
+    combined = combined.map(function(c){ return { word:c.word, prob:c.prob/sum }; });
+    return combined;
+  }
+  function renderBars(){
+    var dist = currentDistribution();
+    var bars = document.getElementById('aBars');
+    bars.innerHTML = '';
+    dist.forEach(function(c){
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = '<span>'+escapeHtml(c.word)+'</span><span class="track"><span class="fill" style="width:'+(c.prob*100).toFixed(1)+'%"></span></span><span>'+(c.prob*100).toFixed(0)+'%</span>';
+      bars.appendChild(row);
+    });
+  }
+  function sampleFrom(dist){
+    var r = Math.random(), cum = 0;
+    for (var i=0;i<dist.length;i++){ cum += dist[i].prob; if (r <= cum) return dist[i].word; }
+    return dist[dist.length-1].word;
+  }
+  function updateOutputDisplay(){
+    var out = document.getElementById('aOutput');
+    var base = aInput.value.replace(/\s+$/,'');
+    var extra = aSamplerState.history.length ? ' ' + aSamplerState.history.join(' ') : '';
+    out.innerHTML = escapeHtml(base + extra) + '<span class="cursor">&nbsp;</span>';
+  }
+  function stepSample(){
+    var dist = currentDistribution();
+    var word = sampleFrom(dist);
+    if (word !== END_TOKEN){ aSamplerState.history.push(word); }
+    else { aSamplerState.history.push('.'); }
+    aSamplerState.lastWord = word === END_TOKEN ? null : word;
+    updateOutputDisplay();
+    renderBars();
+    return word;
+  }
+  document.getElementById('aStepBtn').addEventListener('click', function(){
+    if (aSamplerState.history.length > 24) return;
+    stepSample();
+  });
+  document.getElementById('aResetBtn').addEventListener('click', function(){
+    aSamplerState.history = []; aSamplerState.lastWord = null;
+    clearTimeout(aSamplerState.timer); aSamplerState.running = false;
+    document.getElementById('aAutoBtn').textContent = 'Auto-generate';
+    updateOutputDisplay(); renderBars();
+  });
+  document.getElementById('aAutoBtn').addEventListener('click', function(btnEvt){
+    var btn = document.getElementById('aAutoBtn');
+    if (aSamplerState.running){
+      aSamplerState.running = false; clearTimeout(aSamplerState.timer); btn.textContent = 'Auto-generate';
+      return;
+    }
+    aSamplerState.running = true; btn.textContent = 'Stop';
+    var steps = 0;
+    function loop(){
+      if (!aSamplerState.running || steps >= 14) { aSamplerState.running=false; btn.textContent='Auto-generate'; return; }
+      var w = stepSample(); steps++;
+      if (w === END_TOKEN){ aSamplerState.running=false; btn.textContent='Auto-generate'; return; }
+      aSamplerState.timer = setTimeout(loop, reduceMotion ? 0 : 420);
+    }
+    loop();
+  });
+  ['aTemp','aTopK','aTopP'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      document.getElementById(id+'Val').textContent = document.getElementById(id).value;
+      renderBars();
+    });
+  });
+
+  refreshPartA();
+  updateOutputDisplay();
+  renderBars();
+
+  /* ================= PART B ================= */
+  var DOC_TEXT = "Project Halcyon is an internal battery-cooling platform under development at Aldebaran Robotics, first announced to engineering staff in March 2025. It is designed to replace the aging Meridian-2 thermal system across the next generation of field robots.\n\nThe Halcyon thermal loop is led by Priya Ostrander's Thermal Systems team. It circulates a phase-change dielectric fluid called Cryonex-9 at a flow rate of 4.2 liters per minute, holding battery cell temperature within 1.5 degrees Celsius even under sustained high-load operation.\n\nThe battery pack itself uses silicon-anode lithium cells sourced from Varek Energy, rated at 340 watt-hours per kilogram with a cycle life of roughly 1,800 full charges before capacity drops below 80 percent.\n\nHalcyon's firmware runs on a custom real-time OS called HalcyonRTOS, pushing telemetry every 200 milliseconds and accepting over-the-air updates on a two-week cadence, managed by the Firmware Platform group.\n\nField rollout begins in the Pacific Northwest region in January 2026, followed by a staged expansion to European sites by that September, pending results from the Q4 2025 cold-weather trials.";
+
+  var bDoc = document.getElementById('bDoc');
+  bDoc.value = DOC_TEXT;
+  var bDocHighlighted = document.getElementById('bDocHighlighted');
+  var bChunkList = document.getElementById('bChunkList');
+  var bScatter = document.getElementById('bScatter');
+  var bQuery = document.getElementById('bQuery');
+  var bResults = document.getElementById('bResults');
+  var bPrompt = document.getElementById('bPrompt');
+
+  var CHUNK_COLORS = ['var(--teal)', '#4C8FBD', '#8A7EC8', '#C77DAE', '#7FA653', '#B98A3E'];
+  var bState = { chunks: [] };
+
+  function computeChunks(text, size, overlap){
+    var chunks = [];
+    var step = Math.max(1, size - overlap);
+    for (var start=0; start < text.length; start += step){
+      var end = Math.min(text.length, start+size);
+      chunks.push({ start:start, end:end, text: text.slice(start,end) });
+      if (end === text.length) break;
+    }
+    return chunks;
+  }
+  function renderChunkHighlight(text, chunks){
+    var boundaries = [];
+    chunks.forEach(function(c,i){ boundaries.push({pos:c.start, i:i, type:'start'}); boundaries.push({pos:c.end, i:i, type:'end'}); });
+    var html = '', openSet = [];
+    for (var pos=0; pos<=text.length; pos++){
+      chunks.forEach(function(c,i){
+        if (c.start===pos) openSet.push(i);
+      });
+      if (pos<text.length){
+        var ch = text[pos];
+        var colorIdx = openSet.length ? openSet[openSet.length-1] % CHUNK_COLORS.length : null;
+        if (colorIdx!==null){
+          html += '<mark style="background:color-mix(in srgb, '+CHUNK_COLORS[colorIdx]+' 30%, transparent); color:inherit;">'+escapeHtml(ch)+'</mark>';
+        } else {
+          html += escapeHtml(ch);
+        }
+      }
+      chunks.forEach(function(c,i){
+        if (c.end===pos){ var idx = openSet.indexOf(i); if (idx>-1) openSet.splice(idx,1); }
+      });
+    }
+    bDocHighlighted.innerHTML = html;
+  }
+  function chunkEmbedding(chunkText){
+    var toks = tokenize(chunkText).filter(function(t){ return /[A-Za-z0-9]/.test(t.text); });
+    if (!toks.length) return pseudoEmbed(chunkText, 12);
+    var dims = 12, acc = new Array(dims).fill(0);
+    toks.forEach(function(t){
+      var v = pseudoEmbed(tokenKey(t)+'|embed', dims);
+      for (var i=0;i<dims;i++) acc[i]+=v[i];
+    });
+    return acc.map(function(x){ return x/toks.length; });
+  }
+  function project2D(vec){
+    return { x: (vec[0]+vec[3]-vec[7])/3, y: (vec[1]-vec[4]+vec[9])/3 };
+  }
+
+  function renderScatterAndPrompt(){
+    var size = parseInt(document.getElementById('bChunkSize').value,10);
+    var overlap = parseInt(document.getElementById('bOverlap').value,10);
+    var text = bDoc.value;
+    var chunks = computeChunks(text, size, Math.min(overlap, size-1));
+    chunks.forEach(function(c){ c.embed = chunkEmbedding(c.text); c.pos = project2D(c.embed); });
+    bState.chunks = chunks;
+
+    renderChunkHighlight(text, chunks);
+    bChunkList.innerHTML = '';
+    chunks.forEach(function(c,i){
+      var card = document.createElement('div');
+      card.className = 'chunk-card';
+      card.style.borderLeftColor = CHUNK_COLORS[i % CHUNK_COLORS.length];
+      var preview = c.text.trim().replace(/\s+/g,' ').slice(0,90);
+      card.innerHTML = '<div class="meta">CHUNK '+(i+1)+' · '+c.text.length+' chars</div><p>'+escapeHtml(preview)+(c.text.trim().length>90?'…':'')+'</p>';
+      bChunkList.appendChild(card);
+    });
+
+    runRetrieval();
+  }
+
+  var allXY = [];
+  function computeBounds(points){
+    var xs = points.map(function(p){return p.x;}), ys = points.map(function(p){return p.y;});
+    return { minX:Math.min.apply(null,xs), maxX:Math.max.apply(null,xs), minY:Math.min.apply(null,ys), maxY:Math.max.apply(null,ys) };
+  }
+  function toPixel(pos, bounds, w, h){
+    var pad = 30;
+    var spanX = (bounds.maxX-bounds.minX) || 1, spanY = (bounds.maxY-bounds.minY) || 1;
+    return {
+      x: pad + ((pos.x-bounds.minX)/spanX) * (w-2*pad),
+      y: pad + ((pos.y-bounds.minY)/spanY) * (h-2*pad)
+    };
+  }
+
+  function runRetrieval(){
+    var chunks = bState.chunks;
+    if (!chunks.length) return;
+    var q = bQuery.value || '';
+    var qEmbed = chunkEmbedding(q);
+    var qPos = project2D(qEmbed);
+    var k = parseInt(document.getElementById('bTopK').value,10);
+
+    var scored = chunks.map(function(c,i){ return { i:i, sim: cosineSim(qEmbed, c.embed) }; });
+    scored.sort(function(a,b){ return b.sim-a.sim; });
+    var topSet = {};
+    scored.slice(0,k).forEach(function(s){ topSet[s.i]=true; });
+
+    var allPoints = chunks.map(function(c){ return c.pos; }).concat([qPos]);
+    var bounds = computeBounds(allPoints);
+    var w = bScatter.clientWidth || 400, h = bScatter.clientHeight || 280;
+    bScatter.innerHTML = '';
+    chunks.forEach(function(c,i){
+      var px = toPixel(c.pos, bounds, w, h);
+      var dot = document.createElement('div');
+      dot.className = 'dot' + (topSet[i] ? ' top' : '');
+      dot.style.left = px.x+'px'; dot.style.top = px.y+'px';
+      dot.style.background = CHUNK_COLORS[i % CHUNK_COLORS.length];
+      dot.title = 'Chunk '+(i+1)+' · similarity '+cosineSim(qEmbed,c.embed).toFixed(2);
+      var lbl = document.createElement('span'); lbl.className='lbl'; lbl.textContent = 'C'+(i+1);
+      dot.appendChild(lbl);
+      bScatter.appendChild(dot);
+    });
+    var qPx = toPixel(qPos, bounds, w, h);
+    var qDot = document.createElement('div');
+    qDot.className = 'dot query';
+    qDot.style.left = qPx.x+'px'; qDot.style.top = qPx.y+'px';
+    qDot.title = 'Your question';
+    var qLbl = document.createElement('span'); qLbl.className='lbl'; qLbl.textContent='Q';
+    qDot.appendChild(qLbl);
+    bScatter.appendChild(qDot);
+
+    bResults.innerHTML = '';
+    scored.forEach(function(s, rank){
+      var isTop = rank < k;
+      var row = document.createElement('div');
+      row.className = 'result-row' + (isTop ? ' top' : '');
+      var pct = clamp((s.sim+1)/2, 0, 1) * 100;
+      row.innerHTML = '<span class="rank">#'+(rank+1)+'</span><span class="track"><span class="fill" style="width:'+pct.toFixed(0)+'%; background:'+CHUNK_COLORS[s.i % CHUNK_COLORS.length]+'"></span></span><span>'+s.sim.toFixed(2)+'</span>';
+      row.title = 'Chunk '+(s.i+1);
+      bResults.appendChild(row);
+    });
+
+    var topChunks = scored.slice(0,k).map(function(s){ return chunks[s.i]; });
+    var contextBlock = topChunks.map(function(c,idx){ return '['+(idx+1)+'] '+c.text.trim().replace(/\s+/g,' '); }).join('\n');
+    bPrompt.innerHTML =
+      '<span class="tag">SYSTEM</span>  Answer using only the context below. If it is not covered, say so.\n\n' +
+      '<span class="tag">CONTEXT</span>\n' + escapeHtml(contextBlock) + '\n\n' +
+      '<span class="tag">QUESTION</span>  ' + escapeHtml(q);
+
+    bState.topChunks = topChunks;
+  }
+
+  document.getElementById('bChunkSize').addEventListener('input', function(){
+    document.getElementById('bChunkSizeVal').textContent = this.value;
+    renderScatterAndPrompt();
+  });
+  document.getElementById('bOverlap').addEventListener('input', function(){
+    document.getElementById('bOverlapVal').textContent = this.value;
+    renderScatterAndPrompt();
+  });
+  document.getElementById('bTopK').addEventListener('input', function(){
+    document.getElementById('bTopKVal').textContent = this.value;
+    runRetrieval();
+  });
+  bDoc.addEventListener('input', renderScatterAndPrompt);
+  bQuery.addEventListener('input', runRetrieval);
+  window.addEventListener('resize', function(){ runRetrieval(); });
+
+  function bestSentence(text){
+    var sentences = text.split(/(?<=[.!?])\s+/).map(function(s){return s.trim();}).filter(Boolean);
+    var withDigit = sentences.find(function(s){ return /\d/.test(s); });
+    return withDigit || sentences[0] || text.trim();
+  }
+  document.getElementById('bGenBtn').addEventListener('click', function(){
+    var topChunks = bState.topChunks || [];
+    var answerEl = document.getElementById('bAnswer');
+    if (!topChunks.length){ answerEl.textContent = 'No context retrieved yet.'; return; }
+    var sentence = bestSentence(topChunks[0].text);
+    var full = 'Based on the retrieved passage: "' + sentence + '"';
+    if (reduceMotion){ answerEl.textContent = full; return; }
+    answerEl.innerHTML = '<span class="cursor">&nbsp;</span>';
+    var i = 0;
+    var btn = document.getElementById('bGenBtn');
+    btn.disabled = true;
+    var iv = setInterval(function(){
+      i++;
+      answerEl.innerHTML = escapeHtml(full.slice(0,i)) + '<span class="cursor">&nbsp;</span>';
+      if (i >= full.length){ clearInterval(iv); btn.disabled = false; }
+    }, 14);
+  });
+
+  renderScatterAndPrompt();
+
+  /* ================= NAV SCROLLSPY + VISITED ================= */
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#railList a'));
+  var sections = navLinks.map(function(a){ return document.getElementById(a.getAttribute('data-id')); }).filter(Boolean);
+  var visited = {};
+  try { visited = JSON.parse(localStorage.getItem('byteToAnswerVisited') || '{}'); } catch(e){ visited = {}; }
+  function markSeen(id){
+    visited[id] = true;
+    try { localStorage.setItem('byteToAnswerVisited', JSON.stringify(visited)); } catch(e){}
+    var link = navLinks.find(function(a){ return a.getAttribute('data-id')===id; });
+    if (link) link.classList.add('seen');
+  }
+  navLinks.forEach(function(a){ if (visited[a.getAttribute('data-id')]) a.classList.add('seen'); });
+
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var id = entry.target.id;
+        if (entry.isIntersecting){
+          navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('data-id')===id); });
+          markSeen(id);
+        }
+      });
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+
+  /* ================= CONCEPT MAP ================= */
+  var canvas = document.getElementById('graphCanvas');
+  var ctx = canvas.getContext('2d');
+  var nodesDef = [
+    { id:'byte', label:'Byte', cat:'a' },
+    { id:'token', label:'Token', cat:'a' },
+    { id:'bpe', label:'BPE', cat:'a' },
+    { id:'embed', label:'Embedding', cat:'a' },
+    { id:'transformer', label:'Transformer', cat:'a' },
+    { id:'attention', label:'Attention', cat:'a' },
+    { id:'softmax', label:'Softmax', cat:'a' },
+    { id:'sampling', label:'Sampling', cat:'a' },
+    { id:'chunk', label:'Chunking', cat:'b' },
+    { id:'vindex', label:'Vector index', cat:'b' },
+    { id:'cosine', label:'Cosine sim.', cat:'b' },
+    { id:'retrieval', label:'Retrieval', cat:'b' },
+    { id:'context', label:'Context window', cat:'b' },
+    { id:'prompt', label:'Prompt', cat:'n' },
+    { id:'output', label:'Output', cat:'n' },
+    { id:'halluc', label:'Hallucination', cat:'n' }
+  ];
+  var edgesDef = [
+    ['byte','token'],['token','bpe'],['token','embed'],['embed','transformer'],
+    ['transformer','attention'],['attention','softmax'],['softmax','sampling'],['sampling','output'],
+    ['chunk','vindex'],['embed','vindex'],['vindex','cosine'],['cosine','retrieval'],
+    ['retrieval','context'],['context','prompt'],['prompt','output'],
+    ['halluc','output'],['halluc','retrieval']
+  ];
+  var catColor = { a:'--amber', b:'--teal', n:'--ink-soft' };
+  var W=0,H=0,dpr=1;
+  var nodes = [], edges = [];
+
+  function sizeCanvas(){
+    var rect = canvas.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    W = rect.width; H = rect.height;
+    canvas.width = W*dpr; canvas.height = H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function initGraph(){
+    var byId = {};
+    nodesDef.forEach(function(n, i){
+      var angle = (i/nodesDef.length) * Math.PI*2;
+      var node = { id:n.id, label:n.label, cat:n.cat,
+        x: W/2 + Math.cos(angle)*Math.min(W,H)*0.32 + (Math.random()-0.5)*10,
+        y: H/2 + Math.sin(angle)*Math.min(W,H)*0.32 + (Math.random()-0.5)*10,
+        vx:0, vy:0 };
+      byId[n.id] = node;
+      nodes.push(node);
+    });
+    edgesDef.forEach(function(e){ edges.push({ a: byId[e[0]], b: byId[e[1]] }); });
+  }
+  function simStep(){
+    var repulsion = 2600, springLen = 90, springK = 0.02, centerK = 0.0025, damping = 0.82;
+    for (var i=0;i<nodes.length;i++){
+      for (var j=i+1;j<nodes.length;j++){
+        var dx = nodes[j].x-nodes[i].x, dy = nodes[j].y-nodes[i].y;
+        var d2 = dx*dx+dy*dy || 0.01;
+        var d = Math.sqrt(d2);
+        var f = repulsion/d2;
+        var fx = f*dx/d, fy = f*dy/d;
+        nodes[i].vx -= fx; nodes[i].vy -= fy;
+        nodes[j].vx += fx; nodes[j].vy += fy;
+      }
+    }
+    edges.forEach(function(e){
+      var dx = e.b.x-e.a.x, dy = e.b.y-e.a.y;
+      var d = Math.sqrt(dx*dx+dy*dy) || 0.01;
+      var diff = (d-springLen)*springK;
+      var fx = diff*dx/d, fy = diff*dy/d;
+      e.a.vx += fx; e.a.vy += fy;
+      e.b.vx -= fx; e.b.vy -= fy;
+    });
+    nodes.forEach(function(n){
+      n.vx += (W/2-n.x)*centerK; n.vy += (H/2-n.y)*centerK;
+      if (n.dragging) return;
+      n.vx *= damping; n.vy *= damping;
+      n.x += n.vx; n.y += n.vy;
+      n.x = clamp(n.x, 40, W-40); n.y = clamp(n.y, 30, H-30);
+    });
+  }
+  function drawGraph(){
+    ctx.clearRect(0,0,W,H);
+    var lineColor = getComputedStyle(document.documentElement).getPropertyValue('--line').trim();
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = lineColor;
+    edges.forEach(function(e){
+      ctx.beginPath(); ctx.moveTo(e.a.x,e.a.y); ctx.lineTo(e.b.x,e.b.y); ctx.stroke();
+    });
+    ctx.font = '600 12px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    nodes.forEach(function(n){
+      var colorVar = catColor[n.cat];
+      var color = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, 7, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      var inkColor = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+      ctx.fillStyle = inkColor;
+      ctx.fillText(n.label, n.x, n.y+18);
+    });
+  }
+  var rafId = null;
+  function loop(){
+    simStep(); drawGraph();
+    rafId = requestAnimationFrame(loop);
+  }
+  var dragNode = null;
+  function pointerPos(evt){
+    var rect = canvas.getBoundingClientRect();
+    var cx = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+    var cy = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+    return { x: cx, y: cy };
+  }
+  function nodeAt(pos){
+    for (var i=0;i<nodes.length;i++){
+      var n = nodes[i];
+      var dx = pos.x-n.x, dy = pos.y-n.y;
+      if (dx*dx+dy*dy < 14*14) return n;
+    }
+    return null;
+  }
+  canvas.addEventListener('pointerdown', function(evt){
+    var pos = pointerPos(evt);
+    var n = nodeAt(pos);
+    if (n){ n.dragging = true; dragNode = n; canvas.setPointerCapture(evt.pointerId); }
+  });
+  canvas.addEventListener('pointermove', function(evt){
+    if (!dragNode) return;
+    var pos = pointerPos(evt);
+    dragNode.x = clamp(pos.x,40,W-40); dragNode.y = clamp(pos.y,30,H-30);
+    dragNode.vx = 0; dragNode.vy = 0;
+    if (reduceMotion) drawGraph();
+  });
+  function releaseDrag(){ if (dragNode){ dragNode.dragging = false; dragNode = null; } }
+  canvas.addEventListener('pointerup', releaseDrag);
+  canvas.addEventListener('pointercancel', releaseDrag);
+
+  function startGraph(){
+    sizeCanvas();
+    initGraph();
+    if (reduceMotion){
+      for (var i=0;i<220;i++) simStep();
+      drawGraph();
+    } else {
+      loop();
+    }
+  }
+  if ('IntersectionObserver' in window){
+    var startedGraph = false;
+    var gio = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting && !startedGraph){ startedGraph = true; startGraph(); }
+      });
+    }, { threshold: 0.1 });
+    gio.observe(canvas);
+  } else {
+    startGraph();
+  }
+  window.addEventListener('resize', function(){
+    if (nodes.length){ sizeCanvas(); if (reduceMotion) drawGraph(); }
+  });
+
+})();
+</script>
