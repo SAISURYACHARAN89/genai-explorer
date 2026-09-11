@@ -15,6 +15,10 @@
     --amber-bg:#F3E1CE;
     --teal:#186F67;
     --teal-bg:#D6EAE7;
+    --violet:#5B4BB0;
+    --violet-bg:#E0DCF3;
+    --plum:#8E3B6B;
+    --plum-bg:#F0DAE7;
     --focus:#2A6FD6;
     --font-display:'Big Shoulders Display', system-ui, sans-serif;
     --font-body:'Source Sans 3', system-ui, -apple-system, sans-serif;
@@ -25,6 +29,7 @@
       --bg:#14171C; --bg-panel:#1C2027; --bg-sunken:#11141A;
       --ink:#E7E9ED; --ink-soft:#9AA1AC; --line:#2E343D;
       --amber:#E2924D; --amber-bg:#3B2A18; --teal:#57BCB2; --teal-bg:#173330;
+      --violet:#A79BF0; --violet-bg:#241F3D; --plum:#E08AB8; --plum-bg:#3A1E2E;
       --focus:#6FA3F2;
     }
   }
@@ -32,6 +37,7 @@
     --bg:#14171C; --bg-panel:#1C2027; --bg-sunken:#11141A;
     --ink:#E7E9ED; --ink-soft:#9AA1AC; --line:#2E343D;
     --amber:#E2924D; --amber-bg:#3B2A18; --teal:#57BCB2; --teal-bg:#173330;
+    --violet:#A79BF0; --violet-bg:#241F3D; --plum:#E08AB8; --plum-bg:#3A1E2E;
     --focus:#6FA3F2;
   }
 
@@ -81,6 +87,7 @@
   .legend-item{ display:flex; align-items:center; gap:0.45rem; }
   .swatch{ width:11px; height:11px; border-radius:50%; flex:none; }
   .swatch.amber{ background:var(--amber); } .swatch.teal{ background:var(--teal); } .swatch.core{ background:var(--ink-soft); }
+  .swatch.violet{ background:var(--violet); } .swatch.plum{ background:var(--plum); }
   .deep-dot{ width:11px; height:11px; border-radius:50%; border:2px solid var(--ink); flex:none; }
 
   /* ---- stage ---- */
@@ -159,6 +166,8 @@
 <div class="legend-bar">
   <span class="legend-item"><span class="swatch amber"></span>Generative AI</span>
   <span class="legend-item"><span class="swatch teal"></span>Retrieval / RAG</span>
+  <span class="legend-item"><span class="swatch violet"></span>Agents &amp; Tool Use</span>
+  <span class="legend-item"><span class="swatch plum"></span>Reliability &amp; Evaluation</span>
   <span class="legend-item"><span class="swatch core"></span>Cross-cutting</span>
   <span class="legend-item"><span class="deep-dot"></span>Has a full interactive deep dive</span>
 </div>
@@ -187,6 +196,8 @@
   var CATS = {
     genai: { colorVar:'--amber', label:'Generative AI' },
     rag:   { colorVar:'--teal',  label:'Retrieval / RAG' },
+    agent: { colorVar:'--violet', label:'Agents & Tool Use' },
+    trust: { colorVar:'--plum',  label:'Reliability & Evaluation' },
     core:  { colorVar:'--ink-soft', label:'Cross-cutting' }
   };
 
@@ -253,7 +264,204 @@
       deepDive: BYTE_TO_ANSWER+'#s-prompt' },
     { id:'hallucination', label:'Hallucination', cat:'core',
       note:'A fluent, confident answer that is factually wrong or unsupported — because the model is still just predicting plausible next tokens, not checking anything against a source. RAG doesn\'t eliminate this, but it gives the model something true to draw on instead of guessing.',
-      deepDive: BYTE_TO_ANSWER+'#s-hallucination' }
+      deepDive: BYTE_TO_ANSWER+'#s-hallucination' },
+
+    /* ---- Retrieval beyond the basic RAG loop ---- */
+    { id:'hybridretrieval', label:'Hybrid Retrieval', cat:'rag',
+      note:'Running two different searches over the same corpus — dense vector similarity and literal keyword matching — then fusing their rankings. Each fails differently: vectors catch a paraphrase but blur exact tokens like a version number or a type name, while keyword search nails the literal string and is blind to rewording. Fusing keeps both strengths.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-hybrid' },
+    { id:'lexicalsearch', label:'Lexical Search (BM25)', cat:'rag',
+      note:'Ranking by literal term overlap rather than learned meaning, using an inverted index and a scoring function like BM25 that rewards rare terms and discounts long documents. Fast, exact and explainable — and completely unable to match a synonym.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-hybrid' },
+    { id:'rrf', label:'Reciprocal Rank Fusion', cat:'rag',
+      note:'A way to merge two ranked lists without their scores having to be on the same scale: each item scores 1/(k + rank) in every list it appears in, and those are summed. An item ranked well by both methods rises above one that only a single method liked.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-hybrid' },
+    { id:'reranking', label:'Re-ranking', cat:'rag',
+      note:'A second, more expensive pass over the handful of candidates the first retrieval returned, scoring each against the query with a cross-encoder or a model that reads query and passage together. Retrieval buys recall cheaply; re-ranking buys precision on the short list that survived.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-hybrid' },
+    { id:'metadatafilter', label:'Metadata Filtering', cat:'rag',
+      note:'Constraining retrieval with a hard predicate — scope, tenant, date, document type — applied as a query condition rather than a hint in the prompt. Filtering before scoring means an ineligible chunk can never occupy a slot a valid one should have had.' },
+    { id:'indexprovenance', label:'Index Provenance', cat:'rag',
+      note:'The record of which embedding model built an index. Vectors from two different models are not comparable, so querying an index with a different model than built it returns numbers that look like answers but mean nothing — recording provenance lets the system refuse rather than silently degrade.' },
+    { id:'querytransform', label:'Query Transformation', cat:'rag',
+      note:'Rewriting the question before retrieval: expanding abbreviations, splitting a compound question, or generating several paraphrases and merging their results. The question a person asks is often not the question that best matches how the corpus happens to be written.' },
+
+    /* ---- Function / tool calling ---- */
+    { id:'functioncalling', label:'Function Calling', cat:'agent',
+      note:'The mechanism that lets a model trigger real code. The model never executes anything itself: it emits a structured request naming a function and its arguments, the host runtime validates and runs the real function, then feeds the return value back as another message. Everything "agentic" is built on this one primitive.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-tools' },
+    { id:'tool', label:'Tool', cat:'agent',
+      note:'One callable unit of work exposed to a model: a name, a description, a typed parameter list, a return value. The description is not documentation — it is the only thing the model uses to decide when the tool applies, so a vague description produces wrong tool choices no amount of prompting fixes.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-tools' },
+    { id:'toolschema', label:'Tool Schema', cat:'agent',
+      note:'The machine-readable contract — usually JSON Schema — describing a tool\'s parameters, sent to the model alongside the conversation. Mature frameworks generate it automatically from a function signature and its annotations, which is what stops the runnable code and the model\'s view of it drifting apart.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-tools' },
+    { id:'plugin', label:'Plugin (Tool Group)', cat:'agent',
+      note:'A named collection of tools registered together. The name acts as a namespace so identically-named tools from different sources cannot collide, and it gives surrounding code a cheap way to reason about a whole class of tools at once instead of matching individual function names.' },
+    { id:'toolchoice', label:'Tool Choice Policy', cat:'agent',
+      note:'The setting governing whether a model may call tools on a turn: automatic (decide for itself), required (must call one), a specific named tool, or none (answer in text only). Forcing a call is how you guarantee structure; forbidding one is how you guarantee a plain answer.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-loop' },
+    { id:'toolloop', label:'Tool-Calling Loop', cat:'agent',
+      note:'The cycle underneath every agent: send the conversation, the model requests a tool, run it, append the result, send again — repeating until the model replies without asking for another tool. The loop, not the model, is what turns a single completion into multi-step work.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-loop' },
+    { id:'toolresult', label:'Tool Result', cat:'agent',
+      note:'The value a tool returns, appended to the conversation as a message the model reads on its next pass. It is ordinary data, never a command — and it is frequently serialized to a string before anything downstream sees it, which matters whenever surrounding code expects the original typed object back.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-loop' },
+    { id:'paralleltools', label:'Parallel Tool Calls', cat:'agent',
+      note:'A single model turn requesting several independent tools at once, executed concurrently rather than one after another. Correct only when the calls genuinely do not depend on each other\'s results — otherwise the model is guessing at an ordering it should have made explicit.' },
+    { id:'structuredoutput', label:'Structured Output', cat:'agent',
+      note:'Constraining a model to return data matching a schema instead of prose, so the result deserializes straight into a typed object. Turns "parse the model\'s English", which is endlessly brittle, into an ordinary deserialization step that either succeeds or fails loudly.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-structured' },
+    { id:'schemarepair', label:'Output Repair Retry', cat:'agent',
+      note:'A bounded second attempt when a structured response fails to parse, handing the model back its own malformed output and the error. One retry recovers most formatting slips; unbounded retrying just multiplies cost against a model that has already shown it cannot satisfy the schema.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-structured' },
+    { id:'invocationfilter', label:'Invocation Filter', cat:'agent',
+      note:'Middleware wrapping every tool call: it can inspect arguments before execution, inspect the result after, block the call, or signal the surrounding loop to stop. The natural home for auditing, permission checks and control-flow signals, because it sees every call without each tool having to cooperate.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-handoff' },
+    { id:'earlytermination', label:'Early Termination', cat:'agent',
+      note:'Deliberately halting a model\'s tool-calling loop the moment a particular tool runs, rather than letting it keep reasoning. Turns a tool call into a control signal: the call itself, not the text around it, is what ends the turn — which is far more reliable than detecting intent in prose.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-handoff' },
+
+    /* ---- Agents ---- */
+    { id:'agent', label:'Agent', cat:'agent',
+      note:'A model paired with standing instructions, a set of tools, and a loop that lets it act repeatedly until its task is done. The word describes the assembly, not the model — the same model becomes an entirely different agent by changing its instructions and its toolbox.' },
+    { id:'systemmessage', label:'System Instructions', cat:'agent',
+      note:'The standing brief defining an agent\'s role, scope, method and stopping condition, prepended to every call it makes. It is the agent\'s job description, and most unreliable agent behaviour traces back to instructions that were vague about when to stop or which tool to prefer.' },
+    { id:'leastprivilege', label:'Least-Privilege Tooling', cat:'agent',
+      note:'Giving each agent only the tools its own job requires, so actions outside that job are impossible rather than merely discouraged. A capability the model was never handed cannot be misused by a clever prompt; an instruction saying "never do X" can be.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-approval' },
+    { id:'conversationhistory', label:'Conversation History', cat:'agent',
+      note:'The accumulated messages an agent is re-sent on every call: instructions, user turns, its own replies, and tool calls with their results. Models are stateless between calls, so this list is the entire memory of a session, and its shape decides what the agent can still "remember".' },
+    { id:'contextmanagement', label:'Context Management', cat:'agent',
+      note:'Deciding what stays in a growing history and what gets dropped, summarized or offloaded as it nears the context limit. Every long-running agent eventually needs a policy here, because unbounded history is first expensive and then impossible.' },
+    { id:'sharedcontext', label:'Shared vs Isolated Context', cat:'agent',
+      note:'Whether collaborating agents read one common transcript or each keep their own. Sharing lets a later agent build on earlier work without re-deriving it; isolating stops agents anchoring on each other, which is what makes their agreement evidence rather than echo.' },
+    { id:'agentstate', label:'Agent Session State', cat:'agent',
+      note:'The live conversation an agent holds between interactions, kept somewhere outside any single request so a paused workflow can resume exactly where it stopped. Without it, every resumption restarts the task from nothing.' },
+
+    /* ---- Multi-agent orchestration ---- */
+    { id:'multiagent', label:'Multi-Agent System', cat:'agent',
+      note:'Several narrowly-scoped agents collaborating on one task instead of a single agent holding the whole job. The gain is not extra intelligence but smaller decisions: each agent faces a shorter instruction and fewer tools, and reliability of tool choice degrades as both grow.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'rolespecialization', label:'Role Specialization', cat:'agent',
+      note:'Splitting work by concern so each agent has one job and one perspective. Beyond reliability it makes output auditable: a labelled sequence of narrow steps can be reviewed by a person, while one long stretch of internal reasoning cannot.' },
+    { id:'orchestration', label:'Orchestration', cat:'agent',
+      note:'The layer deciding which agent runs, when, and with what input. Deliberately ordinary code in most mature designs — sequencing is a decision that can be written down once, so spending model calls and inheriting non-determinism on it buys nothing.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'sequentialorch', label:'Sequential Orchestration', cat:'agent',
+      note:'A fixed pipeline: each agent\'s output becomes the next one\'s input, in a predetermined order with no branching. The right shape when the work genuinely has stages, each depending on the one before it.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'concurrentorch', label:'Concurrent Orchestration', cat:'agent',
+      note:'Fanning the same input out to several agents in parallel and collecting all their outputs. Suits independent perspectives on one artifact; wasteful the moment one agent\'s work is an input to another\'s.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'groupchat', label:'Group Chat Orchestration', cat:'agent',
+      note:'A shared conversation where a manager decides who speaks next after each turn, whether to ask a human, and when to stop. The flexible option — appropriate when the order of contributions genuinely cannot be predicted in advance.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'handoff', label:'Handoff Orchestration', cat:'agent',
+      note:'Agents explicitly transferring control to one another, each deciding who takes over next. Fits work shaped like a flowchart — mostly linear, a few known branch points, and a clear notion of "my part is finished" — rather than a free-form discussion.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' },
+    { id:'handofffunction', label:'Handoff Function', cat:'agent',
+      note:'A tool that does no real work and exists only to be called as a signal that control should move — to another agent, to a human, or to completion. Watching for an unambiguous function call is vastly more reliable than parsing free text for an intent to finish.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-handoff' },
+    { id:'selector', label:'Speaker Selection', cat:'agent',
+      note:'The policy picking the next agent to act: round-robin, a rules table, or a model asked to choose. A model-driven selector buys flexibility at the price of one extra call and one more source of non-determinism per turn.' },
+    { id:'terminationcondition', label:'Termination Condition', cat:'agent',
+      note:'The rule that ends a multi-agent run: a completion signal, a keyword in the output, a handoff to a human, or a cap being reached. Every loop containing a model needs at least one condition that cannot itself fail, or a confused agent runs indefinitely.' },
+    { id:'turnbudget', label:'Turn Budget', cat:'agent',
+      note:'A hard ceiling on how many agent turns or model calls one task may consume, enforced by the orchestrator rather than requested in a prompt. Bounds worst-case cost and latency, and converts a silent infinite loop into a visible, reportable failure.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-loop' },
+    { id:'stallrecovery', label:'Stall Recovery', cat:'agent',
+      note:'Handling the case where an agent produces no usable progress — plain text where a tool call was required, or an empty response. A bounded retry with an explicit nudge recovers most instances; without one, an ordinary model hiccup becomes a dead workflow.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-handoff' },
+    { id:'agentastool', label:'Agent as a Tool', cat:'agent',
+      note:'Exposing an entire agent to another agent as if it were a single callable function. Turns delegation into an ordinary tool call and lets hierarchies compose, at the cost of hiding the sub-agent\'s reasoning from the caller\'s transcript.' },
+    { id:'judge', label:'Judge / Adjudicator', cat:'agent',
+      note:'A dedicated agent reviewing other agents\' output: merging duplicates, resolving conflicts, setting final rankings or severities. Effective only when handed questions that genuinely need judgement — anything mechanically checkable should be settled in code before it ever arrives.' },
+    { id:'challengeround', label:'Challenge Round', cat:'agent',
+      note:'A bounded pass where agents examine each other\'s conclusions and corroborate, contest with evidence, or abstain. Deliberately breaks isolation once, after independent work is finished, so agreement carries information that a group discussion from the start would have destroyed.' },
+    { id:'corroboration', label:'Corroboration & Contest', cat:'agent',
+      note:'The two useful outcomes of cross-examination: independent agreement, which raises confidence, and disagreement backed by evidence, which lowers it or removes the claim. Both are only meaningful if abstaining is an equally acceptable answer — otherwise everything drifts toward polite agreement.' },
+
+    /* ---- Human in the loop ---- */
+    { id:'hitl', label:'Human-in-the-Loop', cat:'agent',
+      note:'Designing a workflow so a person makes specific decisions inside it, rather than only reviewing the end. Applied where a mistake is expensive or irreversible, and where a human can decide quickly from material the system has already assembled for them.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-approval' },
+    { id:'approvalgate', label:'Approval Gate', cat:'agent',
+      note:'A required human confirmation placed immediately before an irreversible action. The system prepares everything and then stops; the action is not attempted until an explicit approval arrives, which makes "who authorised this" answerable after the fact.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-approval' },
+    { id:'pauseresume', label:'Pause & Resume', cat:'agent',
+      note:'Structuring a long workflow so it can suspend at a decision point, hand control back to the caller, and continue later from the same state. Fits request-response interfaces naturally, where each resumption is simply the next request carrying the answer.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-approval' },
+    { id:'blockingcallback', label:'Blocking Callback', cat:'agent',
+      note:'The alternative to pause-and-resume: the workflow calls out for human input and waits inside the still-running call. Simple in a console program, awkward on the web, where it forces one long-lived operation to stay alive across separate requests.' },
+
+    /* ---- Reliability, grounding, guardrails ---- */
+    { id:'verification', label:'Verification Layer', cat:'trust',
+      note:'A deterministic check, after generation, that every claim the model made can be substantiated against a real source — and the deletion of whatever cannot. Distinct from grounding: grounding improves the odds the model is right, verification establishes whether this specific output actually is.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'citation', label:'Citation Binding', cat:'trust',
+      note:'Requiring every claim to name the exact source passage supporting it, precisely enough that code can look it up and confirm the quoted text really appears there. A citation that cannot be mechanically resolved is decoration, not evidence.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'sourceanchor', label:'Source Anchor', cat:'trust',
+      note:'A pointer into the material under discussion — a file and line range, a page, a timestamp — checked to exist before the claim referencing it is allowed to stand. Catches the confident, specific claim about a line that was never in the input at all.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'suppression', label:'Suppression', cat:'trust',
+      note:'Discarding an unverifiable output while publishing the fact that it was discarded, with the original text and the specific check it failed. Silent dropping hides how often a model overreaches; a visible suppression record turns reliability into something measurable.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'schemaguard', label:'Schema as Guardrail', cat:'trust',
+      note:'Making required evidence part of the output type, so a response missing it cannot be deserialized at all. Moves a rule out of an instruction the model may ignore and into a constraint the type system enforces before any code sees the value.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-structured' },
+    { id:'guardrail', label:'Guardrail', cat:'trust',
+      note:'Any constraint outside the model limiting what its output can cause: input validation, output schemas, permission checks, blocked actions, spending caps. Layered, because each catches a different failure — and none of them is the prompt.' },
+    { id:'determinismboundary', label:'Determinism Boundary', cat:'trust',
+      note:'The deliberate line where model judgement stops and fixed rules take over, drawn just before consequential decisions. Identical inputs then always produce identical outcomes, and the reasoning behind the final call can be checked by hand.' },
+    { id:'rulegate', label:'Deterministic Rule Gate', cat:'trust',
+      note:'A hard-coded decision table applied to a model\'s output — thresholds, counts, allow-lists — producing the final call. Cheap, auditable, and the natural place for policy that must not vary between two runs on the same input.' },
+    { id:'promptinjection', label:'Prompt Injection', cat:'trust',
+      note:'Untrusted content — a fetched page, a document, a tool result — containing text engineered to read as instructions to the model. Uniquely dangerous in agent systems, because a successful injection inherits whatever tools the agent is holding.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'datainstruction', label:'Data / Instruction Boundary', cat:'trust',
+      note:'Explicitly marking retrieved or fetched content as material to analyse, never as directions to follow. A mitigation rather than a cure: the real defence is least-privilege tooling, so that a successful injection still cannot reach anything harmful.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-verify' },
+    { id:'gracefuldegradation', label:'Graceful Degradation', cat:'trust',
+      note:'Letting one failed component cost only its own contribution instead of the whole run — and saying so in the output. A partial result that declares itself partial is useful; one that silently looks complete is dangerous.' },
+    { id:'observability', label:'Agent Observability', cat:'trust',
+      note:'Recording per-step calls, tokens, latency, tool invocations and outcomes for every agent in a run. Multi-agent failures are usually invisible in the final answer, so a trace of who did what is the only practical way to debug or cost them.' },
+    { id:'streamingprogress', label:'Progress Streaming', cat:'trust',
+      note:'Pushing events to the caller as a long-running workflow advances, instead of only at the end. Multi-agent runs take far longer than a single completion, and a visible trace is the difference between a system that looks like it is working and one that looks hung.' },
+    { id:'backgroundwork', label:'Background Execution', cat:'trust',
+      note:'Running a long agent workflow outside the request that triggered it — accepted onto a queue, worked by a background process, results collected separately. Keeps a multi-minute pipeline from being tied to the lifetime of a single connection.' },
+    { id:'caching', label:'Response Caching', cat:'trust',
+      note:'Reusing a stored response for an identical request rather than paying for it twice. Especially valuable during development and demos, where the same prompt gets run repeatedly against a finite quota.' },
+    { id:'concurrencylimit', label:'Concurrency Throttling', cat:'trust',
+      note:'Capping how many model calls run at once so fan-out respects provider rate limits instead of triggering them. The binding limit is almost always the provider\'s quota, not the machine\'s capacity to run tasks.' },
+    { id:'tokenbudget', label:'Token Budget', cat:'trust',
+      note:'The finite context and output allowance a call must fit inside, and the running cost of everything sent. Multi-agent designs multiply it quickly, since every agent re-reads shared context and every stage pays for its own prompt again.' },
+    { id:'reasoningtokens', label:'Reasoning Tokens', cat:'trust',
+      note:'Hidden tokens some models generate to think before producing visible output. They consume the same budget, so a ceiling set with a normal model in mind can leave a reasoning model no room to answer — producing an empty response rather than an error.' },
+    { id:'modelvariance', label:'Provider & Model Variance', cat:'trust',
+      note:'Behavioural differences between models and API versions: rejected parameters, differing tool-calling reliability, empty completions under particular conditions. Code that worked against one deployment can fail against another with the same nominal interface, so the exact model is part of the configuration, not an implementation detail.' },
+
+    /* ---- Evaluation ---- */
+    { id:'evalharness', label:'Evaluation Harness', cat:'trust',
+      note:'A repeatable script running the system against fixed inputs and scoring the output automatically. Without one, "did that change help?" can only be answered by impression — which is exactly the question that matters most when tuning prompts and pipelines.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-eval' },
+    { id:'goldenset', label:'Golden Set', cat:'trust',
+      note:'A fixed collection of inputs with known-correct expected outputs, curated by hand. The reference every change is measured against, and its quality caps the usefulness of every number derived from it.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-eval' },
+    { id:'precisionrecall', label:'Precision & Recall', cat:'trust',
+      note:'The two ways an output can be wrong, measured separately: precision is what fraction of what it reported was real, recall what fraction of the real issues it found. Nearly every design choice trades one against the other, so a single accuracy number hides the trade being made.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-eval' },
+    { id:'baselinecompare', label:'Baseline Comparison', cat:'trust',
+      note:'Scoring an elaborate design against the simplest thing that could work, on identical inputs. The only way to know whether the complexity is earning anything — and complex agent systems frequently fail to beat one well-prompted call.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-eval' },
+    { id:'fixtures', label:'Recorded Fixtures', cat:'trust',
+      note:'Saved model responses replayed in place of live calls, so tests and CI run deterministically with no key and no cost. Makes a pipeline built on a non-deterministic component testable, at the price of fixtures that drift from real behaviour if never refreshed.' },
+    { id:'nondeterministictesting', label:'Testing Non-Deterministic Systems', cat:'trust',
+      note:'Testing the deterministic parts exhaustively and cheaply — parsers, validators, rule tables, orchestration logic — while covering model-dependent parts with fixtures plus a handful of live end-to-end runs. Asserting on exact model wording is the mistake that leaves such suites permanently broken.' },
+    { id:'costlatency', label:'Cost & Latency Trade-off', cat:'core',
+      note:'Fan-out, extra review passes and larger contexts all buy quality with tokens and wall-clock time, usually at multiples rather than margins. Worth measuring per design rather than assuming, because the more expensive version does not automatically win.' ,
+      deepDive: BYTE_TO_ANSWER+'#s-orchestration' }
   ];
 
   var EDGES = [
@@ -264,7 +472,74 @@
     ['transformer','sampling'], ['softmax','sampling'], ['sampling','temperature'],
     ['chunking','vectorindex'], ['embedding','vectorindex'], ['vectorindex','cosine'], ['cosine','retrieval'],
     ['retrieval','contextwindow'], ['contextwindow','promptassembly'], ['promptassembly','sampling'],
-    ['hallucination','sampling'], ['hallucination','retrieval']
+    ['hallucination','sampling'], ['hallucination','retrieval'],
+
+    /* Retrieval beyond the basic loop */
+    ['retrieval','hybridretrieval'], ['hybridretrieval','lexicalsearch'], ['hybridretrieval','rrf'],
+    ['cosine','hybridretrieval'], ['rrf','reranking'], ['retrieval','reranking'],
+    ['retrieval','metadatafilter'], ['metadatafilter','leastprivilege'],
+    ['vectorindex','indexprovenance'], ['embedding','indexprovenance'],
+    ['retrieval','querytransform'], ['querytransform','promptassembly'],
+
+    /* Prompt assembly opens into tool use */
+    ['promptassembly','functioncalling'], ['functioncalling','tool'], ['tool','toolschema'],
+    ['tool','plugin'], ['functioncalling','toolchoice'], ['functioncalling','toolloop'],
+    ['toolloop','toolresult'], ['toolresult','conversationhistory'], ['toolloop','paralleltools'],
+    ['toolschema','structuredoutput'], ['structuredoutput','schemarepair'],
+    ['toolloop','invocationfilter'], ['invocationfilter','earlytermination'],
+    ['structuredoutput','schemaguard'], ['toolresult','promptinjection'],
+
+    /* Agents */
+    ['toolloop','agent'], ['agent','systemmessage'], ['agent','tool'], ['agent','leastprivilege'],
+    ['agent','conversationhistory'], ['conversationhistory','contextwindow'],
+    ['conversationhistory','contextmanagement'], ['contextmanagement','tokenbudget'],
+    ['agent','agentstate'], ['agentstate','pauseresume'],
+    ['agent','multiagent'], ['multiagent','sharedcontext'], ['multiagent','rolespecialization'],
+    ['multiagent','orchestration'],
+
+    /* Orchestration patterns */
+    ['orchestration','sequentialorch'], ['orchestration','concurrentorch'],
+    ['orchestration','groupchat'], ['orchestration','handoff'],
+    ['groupchat','selector'], ['handoff','handofffunction'],
+    ['handofffunction','earlytermination'], ['handofffunction','invocationfilter'],
+    ['orchestration','terminationcondition'], ['terminationcondition','turnbudget'],
+    ['terminationcondition','stallrecovery'], ['turnbudget','costlatency'],
+    ['orchestration','agentastool'], ['agentastool','tool'],
+    ['multiagent','judge'], ['judge','challengeround'], ['challengeround','corroboration'],
+    ['sharedcontext','corroboration'], ['concurrentorch','challengeround'],
+
+    /* Human in the loop */
+    ['terminationcondition','hitl'], ['hitl','approvalgate'], ['hitl','pauseresume'],
+    ['hitl','blockingcallback'], ['approvalgate','determinismboundary'],
+    ['handofffunction','hitl'],
+
+    /* Grounding and verification */
+    ['hallucination','verification'], ['verification','citation'], ['citation','sourceanchor'],
+    ['verification','suppression'], ['citation','schemaguard'], ['retrieval','citation'],
+    ['schemaguard','guardrail'], ['leastprivilege','guardrail'], ['guardrail','promptinjection'],
+    ['promptinjection','datainstruction'], ['datainstruction','promptassembly'],
+    ['promptinjection','leastprivilege'],
+    ['verification','determinismboundary'], ['determinismboundary','rulegate'],
+    ['judge','determinismboundary'], ['rulegate','guardrail'],
+
+    /* Operating a live system */
+    ['multiagent','gracefuldegradation'], ['stallrecovery','gracefuldegradation'],
+    ['multiagent','observability'], ['observability','tokenbudget'],
+    ['observability','streamingprogress'], ['streamingprogress','backgroundwork'],
+    ['backgroundwork','turnbudget'], ['concurrentorch','concurrencylimit'],
+    ['concurrencylimit','costlatency'], ['caching','costlatency'], ['caching','tokenbudget'],
+    ['tokenbudget','reasoningtokens'], ['reasoningtokens','modelvariance'],
+    ['modelvariance','sampling'], ['modelvariance','functioncalling'],
+    ['contextwindow','tokenbudget'],
+
+    /* Evaluation */
+    ['verification','evalharness'], ['evalharness','goldenset'],
+    ['evalharness','precisionrecall'], ['goldenset','precisionrecall'],
+    ['evalharness','baselinecompare'], ['baselinecompare','multiagent'],
+    ['baselinecompare','costlatency'], ['evalharness','fixtures'],
+    ['fixtures','nondeterministictesting'], ['nondeterministictesting','sampling'],
+    ['nondeterministictesting','rulegate'], ['precisionrecall','suppression'],
+    ['evalharness','reranking'], ['goldenset','retrieval']
   ];
 
   var byId = {};
@@ -356,12 +631,14 @@
   viewListBtn.addEventListener('click', function(){ setView('list'); });
 
   function renderList(){
-    var groups = { genai:[], rag:[], core:[] };
+    // Groups and their order come from CATS, so adding a category is a data change.
+    var order = Object.keys(CATS);
+    var groups = {};
+    order.forEach(function(cat){ groups[cat] = []; });
     CONCEPTS.forEach(function(c){
       if (state.query && c.label.toLowerCase().indexOf(state.query) === -1) return;
-      groups[c.cat].push(c);
+      if (groups[c.cat]) groups[c.cat].push(c);
     });
-    var order = ['genai','rag','core'];
     var html = '';
     order.forEach(function(cat){
       if (!groups[cat].length) return;
